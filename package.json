@@ -1,0 +1,32 @@
+{
+  "name": "bop-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon  src/index.ts --exec ts-node "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^3.15.2",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "password_hash": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/express": "^4.17.13",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/morgan": "^1.9.3",
+    "@types/mysql2": "github:types/mysql2",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.16",
+    "prisma": "^3.15.2",
+    "ts-node": "^10.8.1"
+  }
+}

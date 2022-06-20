@@ -1,0 +1,688 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model articulo_deposito_importacion {
+  id_articulo_deposito_importacion Int     @id
+  cod_deposito                     String? @db.VarChar(50)
+}
+
+model articulos {
+  idArticulo   Int      @id @default(autoincrement())
+  nombre       String?  @db.VarChar(200)
+  categoria    Int?
+  stock        Int?
+  estado       Int?     @default(1) @db.TinyInt
+  precioCompra Decimal? @db.Decimal(10, 0)
+  precioVenta  Decimal? @db.Decimal(10, 0)
+  stockMinimo  Int?
+  entrada      Boolean?
+  salida       Boolean?
+  tipo_modelo  String?  @db.Text
+  descripcion  String?  @db.VarChar(300)
+  serie        String?  @db.VarChar(100)
+  codigo       String?  @db.VarChar(100)
+}
+
+model articulos_laboratorio {
+  idArticuloLaboratorio Int       @id @default(autoincrement())
+  articulo              Int
+  maquina               Int
+  cantidad              Int       @default(0)
+  usuario               Int?
+  fecha_hora            DateTime? @db.DateTime(0)
+  asignado              Int?
+  estado                Int?      @default(1) @db.TinyInt
+  reparados             Int?
+}
+
+model articulos_maquinas {
+  idArticuloMaquina Int       @id @default(autoincrement())
+  maquina           Int
+  articulo          Int
+  cantidad          Int       @default(0)
+  usuario           Int?
+  fecha_hora        DateTime? @db.DateTime(0)
+  estado            Int?      @default(0)
+  fecha_salida      DateTime? @db.DateTime(0)
+  usuario_salida    Int?
+}
+
+model articulos_save {
+  nombre      String  @id @db.VarChar(200)
+  tipo_modelo String? @db.Text
+}
+
+model calendariomenu {
+  idCalendarioMenu Int       @id @default(autoincrement())
+  legajo           String?   @db.VarChar(255)
+  persona_str      String?   @db.VarChar(200)
+  title            String?   @db.VarChar(50)
+  descripcion      String?   @db.VarChar(200)
+  start            DateTime? @db.DateTime(0)
+  color            String?   @db.VarChar(255)
+  textColor        String?   @db.VarChar(255)
+  end              DateTime? @db.DateTime(0)
+  idMenu           Int?
+  estado           Int?      @db.TinyInt
+  f_registro       DateTime? @db.Date
+  idMenuBingo      Int?
+  turno            String?   @db.VarChar(50)
+}
+
+model calendariomenu_old {
+  idCalendarioMenu Int       @id @default(autoincrement())
+  legajo           String?   @db.VarChar(255)
+  title            String?   @db.VarChar(50)
+  descripcion      String?   @db.VarChar(200)
+  start            DateTime? @db.DateTime(0)
+  color            String?   @db.VarChar(255)
+  textColor        String?   @db.VarChar(255)
+  end              DateTime? @db.DateTime(0)
+  idMenu           Int?
+  estado           Int?      @db.TinyInt
+  f_registro       DateTime? @db.Date
+}
+
+model capacitacion {
+  idCapacitacion Int       @id @default(autoincrement())
+  descripcion    String?   @db.Text
+  f_inicio       DateTime? @db.Date
+  f_fin          DateTime? @db.Date
+  estado         Int?
+  tema           String?   @db.VarChar(100)
+  f_registro     DateTime? @db.Date
+  usuario        Int?
+  capacitador    String?   @db.VarChar(200)
+  cupo           Int?
+  modalidad      String?   @db.VarChar(100)
+  evaluacion     String?   @db.VarChar(3)
+  institucion    String?   @db.VarChar(200)
+  tipo           String?   @db.VarChar(100)
+  obligatorio    String?   @db.VarChar(3)
+  sector         String?   @db.VarChar(500)
+}
+
+model capacitacion_persona {
+  idCapacitacionPersona Int       @id @default(autoincrement())
+  idCapacitacion        Int
+  idPersona             Int
+  estado                Int       @default(1) @db.TinyInt
+  fecha_registro        DateTime? @db.DateTime(0)
+  usuario               Int?
+}
+
+model codificados {
+  gen1     String  @db.VarChar(45)
+  atr1     String  @db.VarChar(45)
+  atr2     String  @db.VarChar(45)
+  atr3     String  @db.VarChar(45)
+  gen1desc String? @db.VarChar(100)
+  atr1desc String? @db.VarChar(100)
+  atr2desc String? @db.VarChar(100)
+  atr3desc String? @db.VarChar(100)
+
+  @@id([gen1, atr1, atr2, atr3])
+}
+
+model conexion_bejerman {
+  idConexionBejerman Int     @id @default(autoincrement())
+  username           String? @db.VarChar(255)
+  pass               String? @db.VarChar(255)
+  estado             Int?
+  usuario            Int?
+}
+
+model consola {
+  idConsola      Int      @id @default(autoincrement())
+  usuario        Int
+  accion_id      Int
+  accion         String   @db.Text
+  fecha_registro DateTime @db.DateTime(0)
+  modulo         Int
+}
+
+model desempeno {
+  idDesempeno                    Int      @id @default(autoincrement())
+  idPersona                      Int
+  usuario                        Int
+  f_registro                     DateTime @db.Date
+  estado                         Int?     @default(0)
+  con_tecnico                    String?  @db.VarChar(3)
+  con_operativo                  String?  @db.VarChar(3)
+  precencia_prolijidad           String?  @db.VarChar(3)
+  puntualidad                    String?  @db.VarChar(3)
+  cumplimiento_modalidad_trabajo String?  @db.VarChar(3)
+  vocabulario                    String?  @db.VarChar(3)
+  trabajo_equipo                 String?  @db.VarChar(3)
+  capacidad_organizacion         String?  @db.VarChar(3)
+  vocacion_servicio              String?  @db.VarChar(3)
+  capacidad_analisis             String?  @db.VarChar(3)
+  obs                            String?  @db.Text
+  cumplimiento_normas            String?  @db.VarChar(3)
+}
+
+model desempeno_evol {
+  idDesempenoEvol           Int       @id @default(autoincrement())
+  idEvaluador               Int?
+  usuario                   Int?
+  idPersona                 Int?
+  f_desempeno               DateTime? @db.Date
+  escucha                   Int?
+  ayuda_cliente             Int?
+  empatia                   Int?
+  comparte_informacion      Int?
+  colabora_pares            Int?
+  trabajo_positivo          Int?
+  cumple_objetivos          Int?
+  acepta_sugerencias        Int?
+  situacion_adversas        Int?
+  asistencia_puntualidad    Int?
+  imagen                    Int?
+  limpieza_instalaciones    Int?
+  limpieza_vestuarios       Int?
+  minimiza_perdidas_roturas Int?
+  objetivos                 Int?
+  cumplimientos_sector      Int?
+  estado                    Int?
+  conocimientos_sector      Int?
+  obs                       String?   @db.Text
+}
+
+model documentos {
+  idDocumentos  Int       @id @default(autoincrement())
+  documento     String?   @db.VarChar(150)
+  descripcion   String?   @db.Text
+  file          String?   @db.VarChar(100)
+  path          String?   @db.VarChar(300)
+  url           String?   @db.VarChar(300)
+  fecha         DateTime? @db.Date
+  categoria     String?   @db.VarChar(80)
+  tipo          String?   @db.VarChar(15)
+  size          String?   @db.VarChar(45)
+  sector        Int?
+  referencia    Int?
+  funcionalidad String?   @db.VarChar(200)
+  estado        String?   @default("1") @db.VarChar(255)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model empleados {
+  em_id          String? @db.VarChar(255)
+  em_legajo      String? @db.VarChar(255)
+  em_nombre      String? @db.VarChar(255)
+  em_apellido    String? @db.VarChar(255)
+  em_seccion     String? @db.VarChar(255)
+  em_pass        String? @db.VarChar(255)
+  em_pass_activo String? @db.VarChar(255)
+  em_estado      String? @db.VarChar(255)
+
+  @@ignore
+}
+
+model estudio {
+  idEstudio   Int       @id @default(autoincrement())
+  institucion Int?
+  titulo      String?   @db.VarChar(100)
+  fecha       DateTime? @db.Date
+  estado      Int?      @default(1)
+  tipo        String?   @db.VarChar(100)
+}
+
+model estudio_persona {
+  idEstudio_persona  Int       @id @default(autoincrement())
+  idEstudio          Int?
+  idPersona          Int?
+  descripcion        String?   @db.VarChar(200)
+  fecha_registro     DateTime? @db.Date
+  usuario            Int?
+  estado             Int?      @default(1)
+  estado_str         String?   @db.VarChar(100)
+  fecha_inicio       DateTime? @db.Date
+  fecha_finalizacion DateTime? @db.Date
+}
+
+model falla_articulo {
+  idFallasArticulos Int @id @default(autoincrement())
+  falla             Int
+  articulo          Int
+}
+
+model fallas {
+  idFallas    Int     @id @default(autoincrement())
+  descripcion String? @db.VarChar(200)
+  tipo        String? @default("logica") @db.VarChar(50)
+  estado      Int?
+  gravedad    String? @db.VarChar(50)
+  articulo    String? @db.Text
+}
+
+model fallas_maquinas {
+  idFallas_maquinas Int      @id @default(autoincrement())
+  maquina           Int
+  falla             Int
+  fecha_registro    DateTime @db.DateTime(0)
+  estado            Int
+  usuario           Int
+  ticket            Int?     @default(0)
+}
+
+model familiar {
+  idFamiliar Int     @id @default(autoincrement())
+  idPersona  Int?
+  parentezco String? @db.VarChar(100)
+  documento  String? @db.VarChar(30)
+  estado     Int?    @default(1)
+  nombre     String? @db.VarChar(200)
+  tipo_doc   String? @db.VarChar(10)
+  telefono   String? @default("") @db.VarChar(50)
+}
+
+model fechalimiteprogramado {
+  idFechaLimiteProgramado Int       @id @default(autoincrement())
+  fecha                   DateTime? @db.Date
+  usuario                 Int?      @db.TinyInt
+  estado                  Int?      @db.TinyInt
+  f_registro              DateTime? @db.Date
+}
+
+model institucion {
+  idInstitucion Int     @id @default(autoincrement())
+  nombre        String? @db.VarChar(200)
+  direccion     String? @db.VarChar(200)
+  telefono      String? @db.VarChar(100)
+  email         String? @db.VarChar(200)
+  web           String? @db.VarChar(200)
+  estado        Int?
+}
+
+model licencia {
+  idLicencia  Int     @id @default(autoincrement())
+  titulo      String  @db.VarChar(200)
+  descripcion String? @db.Text
+  dias        Int?
+  estado      Int?    @db.TinyInt
+}
+
+model licencia_persona {
+  idLicenciaPersona Int      @id @default(autoincrement())
+  idLicencia        Int
+  idPersona         Int
+  fecha_registro    DateTime @db.Date
+  usuario           Int
+  estado            Int      @default(1) @db.TinyInt
+  descripcion       String?  @db.Text
+  documento         String   @db.VarChar(200)
+  dias              Int
+  f_inicio          DateTime @db.Date
+  f_fin             DateTime @db.Date
+}
+
+model maquinas {
+  idMaquina   Int     @id @default(autoincrement())
+  nro_egm     Int?
+  fabricante  String? @db.VarChar(50)
+  modelo      String? @db.VarChar(100)
+  p_pago      String? @db.VarChar(10)
+  denom       String? @db.VarChar(6)
+  juego       String? @db.VarChar(200)
+  nro_serie   String? @db.VarChar(50)
+  programa    String? @db.VarChar(200)
+  credito     String? @db.VarChar(200)
+  estado      String? @db.VarChar(3)
+  img         String? @db.VarChar(100)
+  ap_minima   String? @db.VarChar(50)
+  ap_maxima   String? @db.VarChar(50)
+  cant_lineas String? @db.VarChar(50)
+  tipo_juego  String? @db.VarChar(100)
+
+  @@index([idMaquina], map: "idMaquina")
+}
+
+model maquinas_piezas {
+  nro_egm        Int    @id
+  modelo         String @db.VarChar(45)
+  tipo_aceptbill String @db.VarChar(45)
+  tipo_impre     String @db.VarChar(45)
+  tipo_moni      String @db.VarChar(45)
+}
+
+model menu_personal {
+  idMenuPersonal Int       @id @default(autoincrement())
+  estado         Int?      @default(1)
+  f_proceso      DateTime? @db.DateTime(0)
+  descripcion    String?   @db.VarChar(500)
+  usuario_carga  Int?
+  fecha_menu     DateTime? @db.Date
+  tipo_menu      String?   @db.VarChar(100)
+  valor          Decimal?  @db.Decimal(10, 0)
+}
+
+model menu_personal_20190904 {
+  idMenuPersonal Int       @id @default(autoincrement())
+  estado         Int?      @default(1)
+  f_proceso      DateTime? @db.DateTime(0)
+  descripcion    String?   @db.VarChar(500)
+  usuario_carga  Int?
+  fecha_menu     DateTime? @db.Date
+}
+
+model menu_personal_old {
+  idMenuPersonal Int       @id @default(autoincrement())
+  estado         Int?      @default(1)
+  f_proceso      DateTime? @db.DateTime(0)
+  descripcion    String?   @db.VarChar(500)
+  usuario_carga  Int?
+  fecha_menu     DateTime? @db.Date
+}
+
+model movimiento_articulo {
+  idMovimiento_articulo Int      @id @default(autoincrement())
+  articulo              Int
+  cantidad              Int
+  fecha_hora            DateTime @db.DateTime(0)
+  movimiento            String   @db.VarChar(100)
+  usuario               Int
+  locacion              String?  @default("") @db.VarChar(20)
+}
+
+model novedades {
+  idNovedades Int      @id @default(autoincrement())
+  texto       String?  @db.Text
+  referencia  Int
+  estado      Int
+  f_proceso   DateTime @db.DateTime(0)
+  usuario     Int
+  tipo        String   @db.Char(3)
+}
+
+model numerico {
+  numericocol Int @id
+}
+
+model parametro_menu {
+  idParametroMenu Int       @id @default(autoincrement())
+  dia             String    @db.VarChar(100)
+  tiempo          String    @db.VarChar(50)
+  cantidad        Int
+  f_proceso       DateTime? @db.DateTime(0)
+  usuario_carga   Int?
+  estado          Int?
+}
+
+model pedido {
+  idPedido         Int       @id @default(autoincrement())
+  idCalendarioMenu Int?
+  idMenu           Int?
+  usuario          Int?
+  f_registro       DateTime? @db.DateTime(0)
+  f_listo          DateTime? @db.Date
+  estado           Int?
+  persona          Int?
+  legajo           String?   @db.VarChar(255)
+  persona_str      String?   @db.VarChar(255)
+  descripcion      String?   @db.VarChar(255)
+  importe_externo  Decimal?  @db.Decimal(11, 0)
+  importe_interno  Decimal?  @db.Decimal(10, 0)
+  idMenuBingo      Int?
+  turno            String?   @db.VarChar(50)
+}
+
+model pedido_old {
+  idPedido         Int       @id @default(autoincrement())
+  idCalendarioMenu Int?
+  idMenu           Int?
+  usuario          Int?
+  f_registro       DateTime? @db.DateTime(0)
+  f_listo          DateTime? @db.Date
+  estado           Int?
+  persona          Int?
+  legajo           String?   @db.VarChar(255)
+  persona_str      String?   @db.VarChar(255)
+  descripcion      String?   @db.VarChar(255)
+}
+
+model permisos {
+  idPermiso      Int       @id @default(autoincrement())
+  nombre         String    @db.VarChar(80)
+  permisos       String?   @db.Text
+  estado         Boolean?
+  fecha_registro DateTime? @db.Date
+}
+
+model persona {
+  id                       Int       @id
+  nombre                   String    @db.VarChar(100)
+  apellido                 String    @db.VarChar(100)
+  alta                     DateTime
+  id_tarjeta               Int?
+  legajo                   String?   @db.VarChar(100)
+  preciohora               Decimal   @db.Decimal(10, 2)
+  extras                   Int       @db.TinyInt
+  id_bioadmin              Int?
+  imagen                   Bytes?
+  inc_reportes             Int?      @db.TinyInt
+  eliminado                DateTime?
+  fecha_ingreso            DateTime?
+  contrasena               String?   @db.VarChar(5)
+  rol                      Int
+  direccion                String?   @db.VarChar(100)
+  dni                      String?   @db.VarChar(15)
+  email                    String?   @db.VarChar(50)
+  cel                      String?   @db.VarChar(15)
+  tel                      String?   @db.VarChar(15)
+  cp                       String?   @db.VarChar(50)
+  vehiculo                 String?   @db.VarChar(20)
+  patente                  String?   @db.VarChar(50)
+  id_provincia             Int?      @db.SmallInt
+  localidad                String?   @db.VarChar(30)
+  id_calendario            Int?
+  tarjetazk                String?   @db.VarChar(20)
+  fecha_venc               DateTime?
+  id_sector_por_empresa    Int?
+  remoto_password          String?   @db.VarChar(100)
+  envio_tarde              Int       @db.TinyInt
+  ultima_fecha_envio_tarde DateTime? @db.Date
+  email_trabajo            String?   @db.VarChar(100)
+  cuil                     String?   @db.VarChar(12)
+  pass_myweb               String?   @db.VarChar(50)
+  modulos_habilitados      String?   @db.VarChar(20)
+  IDPHONE                  String?   @db.VarChar(100)
+  ES_VISITA                Int?      @db.TinyInt
+  V_EMPRESA_ORIGEN         String?   @db.VarChar(100)
+  V_EMPLEADO_VISITA        Int?
+  V_PERTENENCIAS           String?   @db.VarChar(250)
+  V_NRO_ART                String?   @db.VarChar(25)
+  V_MOTIVO_VISITA          String?   @db.VarChar(250)
+  V_VENCIDO                Int?      @db.TinyInt
+  FECHA_NACIMIENTO         DateTime? @db.Date
+  PUESTO_TRABAJO           String?   @db.VarChar(50)
+}
+
+model premio {
+  idPremio     Int       @id @default(autoincrement())
+  nombre       String?   @db.VarChar(100)
+  descripcion  String?   @db.VarChar(500)
+  img          String?   @db.VarChar(500)
+  estado       Int?
+  f_premio     DateTime? @db.DateTime(0)
+  f_proceso    DateTime? @db.Date
+  tipo         String?   @db.VarChar(50)
+  mes_cumplido Int?
+}
+
+model premio_persona {
+  idPremioPersona Int       @id @default(autoincrement())
+  idPremio        Int
+  idPersona       Int
+  descripcion     String?   @db.VarChar(500)
+  fecha_entrega   DateTime? @db.DateTime(0)
+  tipo            String?   @db.VarChar(100)
+  estado          Int       @default(1) @db.TinyInt
+  usuario         Int
+  fecha_registro  DateTime  @db.DateTime(0)
+}
+
+model sala {
+  idSala      Int       @id @default(autoincrement())
+  title       String?   @db.VarChar(255)
+  descripcion String?   @db.Text
+  color       String?   @db.VarChar(255)
+  textColor   String?   @db.VarChar(255)
+  start       String?   @db.VarChar(20)
+  end         String?   @db.VarChar(20)
+  estado      Int?      @db.TinyInt
+  f_creacion  DateTime? @db.Date
+  usuario     Int?
+}
+
+model sala_copy {
+  idSala      Int       @id @default(autoincrement())
+  title       String?   @db.VarChar(255)
+  descripcion String?   @db.Text
+  color       String?   @db.VarChar(255)
+  textColor   String?   @db.VarChar(255)
+  start       DateTime? @db.DateTime(0)
+  end         DateTime? @db.DateTime(0)
+  estado      Int?      @db.TinyInt
+  f_creacion  DateTime? @db.Date
+  usuario     Int?
+}
+
+model sector {
+  idSector Int     @id @default(autoincrement())
+  nombre   String? @db.VarChar(100)
+  estado   Int?
+}
+
+model seleccion_personal {
+  idSeleccion_personal Int       @id @default(autoincrement())
+  nombre               String?   @db.VarChar(100)
+  apellido             String?   @db.VarChar(100)
+  domicilio            String?   @db.VarChar(300)
+  contacto             String?   @db.VarChar(255)
+  fuente_reclutamiento String?   @db.VarChar(100)
+  descripcion          String?   @db.VarChar(500)
+  estado               Int?
+  f_proceso            DateTime? @db.Date
+  meta_estado          String?   @db.VarChar(200)
+  fecha_meta_estado    DateTime? @db.Timestamp(0)
+  sector               Int?      @default(0)
+}
+
+model slot_test {
+  tst_id         Int      @default(autoincrement())
+  tst_egm        Int
+  tst_srl_acept  String   @db.VarChar(20)
+  tst_srl_impr   String   @db.VarChar(20)
+  tst_srl_monit  String   @db.VarChar(20)
+  tst_srl_bckpln String   @db.VarChar(20)
+  tst_srl_mother String   @db.VarChar(20)
+  tst_hora_fecha DateTime @default(now()) @db.Timestamp(0)
+
+  @@id([tst_id, tst_egm])
+}
+
+model stock_bejerman {
+  stkart_codgen     String? @db.VarChar(255)
+  skart_codEle1     String? @db.VarChar(255)
+  skart_codEle2     String? @db.VarChar(255)
+  skart_codEle3     String? @db.VarChar(255)
+  deposito          String? @db.VarChar(255)
+  cantidad          String? @db.VarChar(255)
+  f_carga_bejerman  String? @db.VarChar(255)
+  autor             String? @db.VarChar(255)
+  id_stock_bejerman Int     @id @default(autoincrement())
+}
+
+model tema {
+  idTema Int     @id @default(autoincrement())
+  nombre String? @db.VarChar(200)
+  estado Int?
+}
+
+model ticket {
+  idTicket    Int       @id @default(autoincrement())
+  solicita    Int       @default(0)
+  idAsignado  Int       @default(0)
+  referencia  Int       @default(0)
+  descripcion String?   @db.VarChar(250)
+  prioridad   String?   @db.Char(1)
+  estado      Boolean?  @default(true)
+  f_solicitud DateTime? @db.DateTime(0)
+  f_respuesta DateTime? @db.DateTime(0)
+  modulo      String?   @db.VarChar(40)
+  submodulo   String?   @db.VarChar(40)
+  categoria   String?   @db.VarChar(500)
+  tipo        String?   @db.VarChar(500)
+  f_cierre    DateTime  @db.DateTime(0)
+  f_proceso   DateTime  @db.DateTime(0)
+  f_atencion  DateTime  @db.DateTime(0)
+  sector      Int?
+}
+
+model titulo {
+  idTitulo Int     @id @default(autoincrement())
+  nombre   String? @db.VarChar(255)
+  estado   Int?    @default(1)
+}
+
+model uniforme {
+  idUniforme  Int     @id @default(autoincrement())
+  prenda      String? @db.VarChar(100)
+  tipo_prenda String? @db.VarChar(100)
+  talle       String? @db.VarChar(30)
+  cantidad    Int?
+  estado      Int?    @default(1)
+}
+
+model uniforme_has_persona {
+  idUniforme_has_persona Int       @id @default(autoincrement())
+  idUniforme             String    @db.VarChar(50)
+  idPersona              Int
+  f_proceso              DateTime? @db.Date
+  detalle                String?   @db.VarChar(100)
+  descripcion            String?   @db.VarChar(500)
+  usuario                Int?
+  estado                 Int?      @default(1)
+}
+
+model usuarios {
+  idUsuarios     Int      @id @default(autoincrement())
+  nombre         String   @db.VarChar(80)
+  usr            String   @db.VarChar(80)
+  email          String   @db.VarChar(80)
+  clave          String   @db.VarChar(200)
+  celular        String?  @db.VarChar(20)
+  estado         Boolean
+  permisos_id    Int
+  fecha_registro DateTime @db.Date
+  legajo         String?  @db.VarChar(7)
+
+  @@index([permisos_id], map: "fk_usuarios_permissoes1_idx")
+}
+
+model vacuna_persona {
+  idVacunaPersona Int       @id @default(autoincrement())
+  idPersona       String    @db.VarChar(20)
+  tipo            String?   @db.VarChar(20)
+  dosis           String?   @db.VarChar(20)
+  estado          Int?
+  marca           String?   @db.VarChar(11)
+  fecha_vacuna    DateTime? @db.Date
+  fecha_registro  DateTime? @db.Date
+}
+
+model valormenu {
+  idValorMenu     Int       @id @default(autoincrement())
+  importe_externo Decimal?  @db.Decimal(11, 0)
+  f_registro      DateTime? @db.Date
+  usuario         Int?
+  estado          Int?      @db.TinyInt
+  importe_interno Decimal?  @db.Decimal(11, 0)
+}
