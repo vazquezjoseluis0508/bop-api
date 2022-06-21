@@ -1,7 +1,5 @@
 import express, { Application } from 'express'
 import morgan from 'morgan'
-import { signin } from './controllers/auth.controller';
-import { getUsuarios } from './controllers/usuarios.controller';
 
 // Routes
 import IndexRoutes from './routes/index.routes'
