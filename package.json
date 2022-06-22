@@ -1,8 +1,11 @@
 {
   "name": "bop-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "rest api for bingo oasis pilar",
   "main": "index.js",
+  "engines": {
+    "node": "16.8.0"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "nodemon  src/index.ts --exec ts-node ",
