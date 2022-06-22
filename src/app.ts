@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import IndexRoutes from './routes/index.routes'
 import UsuariosRoutes from './routes/usuarios.routes'
 import authRoutes from './routes/auth.routes'
+import cors from 'cors'
 
 export class App {
     app: Application;
@@ -23,6 +24,7 @@ export class App {
     }
 
     private middlewares() {
+        this.app.use(cors())
         this.app.use(morgan('dev'));
         this.app.use(express.json());
     }
