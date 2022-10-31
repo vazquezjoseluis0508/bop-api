@@ -1,3 +1,8 @@
 .env
 /node_modules
 /dist
+/prisma/dbml
+/prisma/ERD.svg
+/prisma/docs
+/prisma/prisma-joi-validator
+

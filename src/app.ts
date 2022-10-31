@@ -7,6 +7,7 @@ import IndexRoutes from './routes/index.routes'
 import UsuariosRoutes from './routes/usuarios.routes'
 import authRoutes from './routes/auth.routes'
 import menuRoutes from './routes/menu.routes'
+import pedidosRoutes from './routes/pedidos.routes'
 
 export class App {
     app: Application;
@@ -35,6 +36,7 @@ export class App {
         this.app.use('/api/usuarios', UsuariosRoutes);
         this.app.use('/api/auth', authRoutes);
         this.app.use('/api/menu', menuRoutes);
+        this.app.use('/api/pedidos', pedidosRoutes); // <--- Agregado
     }
 
     async listen(): Promise<void> {
