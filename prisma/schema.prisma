@@ -2,6 +2,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
+
+// generator docs {
+//   provider = "node node_modules/prisma-docs-generator"
+// }
+
+generator class_validator {
+  provider   = "prisma-class-validator-generator"
+}
+
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")

@@ -1,11 +1,12 @@
 import express, { Application } from 'express'
 import morgan from 'morgan'
+import cors from 'cors'
 
 // Routes
 import IndexRoutes from './routes/index.routes'
 import UsuariosRoutes from './routes/usuarios.routes'
 import authRoutes from './routes/auth.routes'
-import cors from 'cors'
+import menuRoutes from './routes/menu.routes'
 
 export class App {
     app: Application;
@@ -31,8 +32,9 @@ export class App {
 
     private routes() {
         this.app.use(IndexRoutes);
-        this.app.use('/usuarios', UsuariosRoutes);
-        this.app.use('/auth', authRoutes);
+        this.app.use('/api/usuarios', UsuariosRoutes);
+        this.app.use('/api/auth', authRoutes);
+        this.app.use('/api/menu', menuRoutes);
     }
 
     async listen(): Promise<void> {
