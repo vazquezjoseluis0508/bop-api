@@ -24,3 +24,16 @@ export async function getMenuByDate(req: Request, res: Response): Promise<Respon
         console.log(e)
     }
 }
+
+
+export async function getParametrosMenu(req: Request, res: Response): Promise<Response | void> {
+    try {
+        const parametrosMenu = await prisma.parametro_menu.findFirst({
+            where: { estado: 1 }
+        })
+        return res.json(parametrosMenu);
+    }
+    catch (e) {
+        console.log("🚀 ~ file: menu.controller.ts ~ line 37 ~ getParametrosMenu ~ e", e)
+    }
+}

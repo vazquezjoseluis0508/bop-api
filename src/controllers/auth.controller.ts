@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client'
+import { IUsuarios } from '../interface/Usuarios';
 
 const prisma = new PrismaClient()
 
@@ -21,24 +22,45 @@ export const signin = async (req: Request, res: Response) => {
         if (!correctPassword) return res.status(400).json('Invalid Password');
 
         // Create a Token
-        const token: string = jwt.sign({ _id: user.idUsuarios }, process.env['TOKEN_SECRET'] || '');
+        const token: string = jwt.sign({ _id: user.idUsuarios }, process.env['TOKEN_SECRET'] || '', {
+            expiresIn: 1800 // 30 minutes
+            });
         res.header('Authorization', token).json(token);
-        console.log("user logged in: ", user)
     } catch (error) {
         console.log({ error })
     }
 };
 
 export const profile = async (req: Request, res: Response) => {
-    const user = await prisma.usuarios.findUnique({
-        where: {
-            idUsuarios: parseInt(req.userId),
-        },
-    });
-    if (!user) {
-        return res.status(404).json('No User found');
+    try {
+
+        const user: any = await prisma.usuarios.findUnique({
+            where: {
+                idUsuarios: parseInt(req.userId),
+            },
+            include :  {
+                permisos : true
+            }
+        });
+        if (!user) {
+            return res.status(404).json('No User found');
+        }
+
+
+        const permisos = JSON.parse(user.permisos.permisos)
+        console.log("🚀 ~ file: auth.controller.ts ~ line 51 ~ profile ~ user.permisos.permiso", user.permisos.permisos)
+        // console.log("🚀 ~ file: auth.controller.ts ~ line 54 ~ permisos ~ permisos", permisos)
+
+        user.clave = '**********';
+
+        
+        
+        res.json(user);
+        
+    } catch (error) {
+        console.log("🚀 ~ file: auth.controller.ts ~ line 48 ~ profile ~ error", error)
     }
-    res.json(user);
+    
 };
 
 const validationPassword = async (hash: string, body_password: string) => {

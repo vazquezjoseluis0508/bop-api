@@ -1,11 +1,13 @@
-import { getMenuByDate } from '../controllers/menu.controller';
+import { getMenuByDate, getParametrosMenu} from '../controllers/menu.controller';
 import { Router } from 'express'
 import { TokenValidation } from '../libs/verifyToken'
 
 const router = Router();
 
-router.route('/menuByDate/:fecha_menu')
-    .get(TokenValidation, getMenuByDate)
+router
+    .get('/menuByDate/:fecha_menu', TokenValidation, getMenuByDate)
+    .get('/parametrosMenu', TokenValidation, getParametrosMenu)
+
 
 
 export default router;

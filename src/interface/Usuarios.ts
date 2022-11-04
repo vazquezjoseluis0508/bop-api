@@ -3,5 +3,12 @@ export interface IUsuarios {
     nombre: string;
     usr: string;
     email: string;
-    clave: string;
+    clave?: string;
+    permisos?: IPermisos;
+    legajo: string;
+}
+
+export interface IPermisos {
+    idPermisos?: number;
+    permiso: string;
 }
