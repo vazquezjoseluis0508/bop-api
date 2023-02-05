@@ -16,16 +16,29 @@ export const signin = async (req: Request, res: Response) => {
                 usr
             }
         });
-        if (!user) return res.status(400).json('Email or Password is wrong');
+
+
+
+        if (!user) return res.status(401).json({message: 'Usuario o password invalido'});
 
         const correctPassword = await validationPassword(user.clave, password);
-        if (!correctPassword) return res.status(400).json('Invalid Password');
+        if (!correctPassword) return res.status(401).json({message: 'Usuario o password invalido'});
 
         // Create a Token
         const token: string = jwt.sign({ _id: user.idUsuarios }, process.env['TOKEN_SECRET'] || '', {
             expiresIn: 1800 // 30 minutes
             });
-        res.header('Authorization', token).json(token);
+        const response = {
+            access_token: token,
+            legajo: user.legajo,
+            usr: user.usr,
+            nombre: user.nombre,
+            permiso_id: user.permisos_id,
+            message: 'Login Successfull'            
+        }
+
+        res.header('auth-token', token).json(response);
+
     } catch (error) {
         console.log({ error })
     }
@@ -38,9 +51,9 @@ export const profile = async (req: Request, res: Response) => {
             where: {
                 idUsuarios: parseInt(req.userId),
             },
-            include :  {
-                permisos : true
-            }
+            // include :  {
+            //     permisos : true
+            // }
         });
         if (!user) {
             return res.status(404).json('No User found');

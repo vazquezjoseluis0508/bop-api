@@ -465,12 +465,11 @@ model pedido_old {
 }
 
 model permisos {
-  idPermiso      Int        @id @default(autoincrement())
-  nombre         String     @db.VarChar(80)
-  permisos       String?    @db.Text
+  idPermiso      Int       @id @default(autoincrement())
+  nombre         String    @db.VarChar(80)
+  permisos       String?   @db.Text
   estado         Boolean?
-  fecha_registro DateTime?  @db.Date
-  usuarios       usuarios[]
+  fecha_registro DateTime? @db.Date
 }
 
 model persona {
@@ -672,7 +671,7 @@ model uniforme_has_persona {
 }
 
 model usuarios {
-  idUsuarios     Int      @id @unique(map: "usuarios_idUsuarios_unique")
+  idUsuarios     Int      @id @default(autoincrement())
   nombre         String   @db.VarChar(80)
   usr            String   @db.VarChar(80)
   email          String   @db.VarChar(80)
@@ -682,7 +681,6 @@ model usuarios {
   permisos_id    Int
   fecha_registro DateTime @db.Date
   legajo         String?  @db.VarChar(7)
-  permisos       permisos @relation(fields: [permisos_id], references: [idPermiso], onDelete: NoAction, onUpdate: NoAction, map: "usuarios_ibfk_1")
 
   @@index([permisos_id], map: "fk_usuarios_permissoes1_idx")
 }
