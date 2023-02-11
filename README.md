@@ -11,6 +11,13 @@ npm i
 
 ### Configure Prisma
 
+Instalar el CLI de prisma 
+
+```
+npm install -g prisma
+
+```
+
 Generear un archivo _*.env*_ tal y como figura en el env.example, configurar la base de datos
 
 ``` 
