@@ -6,6 +6,29 @@ import { isDate } from 'class-validator'
 const prisma = new PrismaClient()
 
 
+export async function getMenus(req: Request, res: Response): Promise<Response | void> {
+    try {
+
+        // current month
+        const currentMonth = new Date().getMonth() + 1
+
+        const menus = await prisma.menu_personal.findMany({
+            where: { 
+                estado: 1, 
+                fecha_menu: { 
+                gte: new Date(new Date().getFullYear(), currentMonth - 1, 1) } 
+            },
+            orderBy: { fecha_menu: 'desc' },
+            take: 1000
+            
+        })
+        return res.json(menus);
+    }
+    catch (e) {
+        console.log(e)
+    }
+}
+
 export async function getMenuByDate(req: Request, res: Response): Promise<Response | void> {
     try {
         const { fecha_menu } = req.params
