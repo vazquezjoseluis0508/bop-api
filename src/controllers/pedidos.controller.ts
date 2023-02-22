@@ -61,3 +61,16 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 30 ~ reservarMenu ~ e", e)
     }
 }
+
+export async function getReservas (req: Request, res: Response): Promise<Response | void> {
+    try {
+
+        const pedidos = await prisma.calendariomenu.findMany({
+            where: { estado: 2 }
+        })
+        return res.json(pedidos);
+    }
+    catch (e) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 30 ~ reservarMenu ~ e", e)
+    }
+}
