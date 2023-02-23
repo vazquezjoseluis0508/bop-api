@@ -25,9 +25,11 @@ export const signin = async (req: Request, res: Response) => {
 
         // Create a Token
         const token: string = jwt.sign({ _id: user.idUsuarios }, process.env['TOKEN_SECRET'] || '', {
-            expiresIn: 1800 // 30 minutes
+            // expiresIn: 1800 // 30 minutes
+            expiresIn: 86400 // 24 hours
             });
         const response = {
+            idUsuarios: user.idUsuarios,
             access_token: token,
             legajo: user.legajo,
             usr: user.usr,
