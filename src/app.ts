@@ -1,6 +1,6 @@
 import express, { Application } from 'express'
 import morgan from 'morgan'
-import cors from 'cors'
+import cors, { CorsOptions } from 'cors'
 
 // Routes
 import IndexRoutes from './routes/index.routes'
@@ -8,6 +8,16 @@ import UsuariosRoutes from './routes/usuarios.routes'
 import authRoutes from './routes/auth.routes'
 import menuRoutes from './routes/menu.routes'
 import pedidosRoutes from './routes/pedidos.routes'
+import { PrismaClient } from '@prisma/client'
+
+const origin = process.env['ORIGIN'] || 'http://localhost:3001';
+export const corsOptions: CorsOptions = {
+    origin: [origin],
+    credentials: true,
+};
+
+
+
 
 export class App {
     app: Application;

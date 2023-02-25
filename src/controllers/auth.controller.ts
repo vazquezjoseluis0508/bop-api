@@ -16,8 +16,6 @@ export const signin = async (req: Request, res: Response) => {
             }
         });
 
-
-
         if (!user) return res.status(401).json({message: 'Usuario o password invalido'});
 
         const correctPassword = await validationPassword(user.clave, password);
@@ -40,7 +38,8 @@ export const signin = async (req: Request, res: Response) => {
 
         res.header('auth-token', token).json(response);
 
-    } catch (error) {
+    } catch (error : any) {
+        res.status(500).json({ "error": "Server error.", "message": error.message })
         console.log({ error })
     }
 };

@@ -14,9 +14,21 @@ export const reservaValidation = (data: IPedido) => {
         usuario: Joi
             .number()
             .required(),
+        fecha: Joi
+            .date()
+            .required(),
             
     });
     return pedidoSchema.validate(data);
 };
+
+export const getReservaValidation = (data: any) => {
+    const pedidoSchema = Joi.object({
+        legajo: Joi
+            .string()
+            .required(),
+    });
+    return pedidoSchema.validate(data);
+}
 
 

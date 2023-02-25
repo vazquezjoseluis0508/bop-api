@@ -1,10 +1,36 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { reservaValidation } from '../dtos/pedidos.dto';
-import { date } from 'joi';
+import { getReservaValidation, reservaValidation } from '../dtos/pedidos.dto';
 
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+    log: [
+      {
+        emit: 'event',
+        level: 'query',
+      },
+      {
+        emit: 'stdout',
+        level: 'error',
+      },
+      {
+        emit: 'stdout',
+        level: 'info',
+      },
+      {
+        emit: 'stdout',
+        level: 'warn',
+      },
+    ],
+  })
+  
+  prisma.$on('query', (e) => {
+    console.log('Query: ' + e.query)
+    console.log('Params: ' + e.params)
+    console.log('Duration: ' + e.duration + 'ms')
+  })
+
+
 
 
 export async function reservarMenu(req: Request, res: Response): Promise<Response | void> {
@@ -14,20 +40,23 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
     if (error) return res.status(400).json(error.message);
 
     try {
+
         
-        const { idMenu, turno, usuario } = req.body
+        const { idMenu, turno, usuario, fecha } = req.body
+        console.log("idUser: ",  usuario)
         // get user
         const user = await prisma.usuarios.findUnique({
             where: {
-                idUsuarios: usuario
+                idUsuarios: parseInt(usuario)
             }
         });
+
         if (!user) return res.status(400).json('Usuario no encontrado');
 
         // get menu
         const menu = await prisma.menu_personal.findUnique({
             where: {
-                idMenuPersonal: idMenu
+                idMenuPersonal: parseInt(idMenu)
             }
         });
         if (!menu) return res.status(400).json('Menu no encontrado');
@@ -39,11 +68,11 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
                 persona_str: user.nombre,
                 title: menu.descripcion,
                 descripcion: 'Reserva de menu',
-                start: new Date(),
+                start: new Date(fecha),
                 color: '#FF0000',
                 textColor: '#FFFFFF',
-                end: new Date(),
-                idMenu: idMenu,
+                end: new Date(fecha),
+                idMenu: parseInt(idMenu),
                 idMenuBingo: 0,
                 turno: turno,
                 estado: 2, // 1: pendiente, 2: reservado, 3: cancelado
@@ -63,14 +92,33 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
 }
 
 export async function getReservas (req: Request, res: Response): Promise<Response | void> {
+
+    // Validation
+    const { error } = getReservaValidation(req.query);
+    if (error) return res.status(400).json(error.message);
+
     try {
+        const { legajo } = req.query
+
+        const date = new Date();
+
+        const after30Days = new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000);
+
 
         const pedidos = await prisma.calendariomenu.findMany({
-            where: { estado: 2 }
+            where: { 
+                estado: 2,
+                legajo: String(legajo),
+                // start: {
+                //     gte: date,
+                //     lte: after30Days
+                // }
+             }
         })
+
         return res.json(pedidos);
     }
     catch (e) {
-        console.log("🚀 ~ file: pedidos.controller.ts ~ line 30 ~ reservarMenu ~ e", e)
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
 }
