@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { getReservaValidation, reservaValidation } from '../dtos/pedidos.dto';
+import { deleteReservaValidation, getReservaValidation, reservaValidation } from '../dtos/pedidos.dto';
 
 
 const prisma = new PrismaClient({
@@ -43,7 +43,6 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
 
         
         const { idMenu, turno, usuario, fecha } = req.body
-        console.log("idUser: ",  usuario)
         // get user
         const user = await prisma.usuarios.findUnique({
             where: {
@@ -60,6 +59,8 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
             }
         });
         if (!menu) return res.status(400).json('Menu no encontrado');
+
+        console.log("servidor: ",  new Date(fecha))
 
         // save reserva menu 
         const calendario_menu = await prisma.calendariomenu.create({
@@ -95,7 +96,7 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
 
     // Validation
     const { error } = getReservaValidation(req.query);
-    if (error) return res.status(400).json(error.message);
+    if (error) throw new Error(error.message);
 
     try {
         const { legajo } = req.query
@@ -122,3 +123,29 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
 }
+
+export async function eliminarReserva (req: Request, res: Response): Promise<Response | void> {
+  
+      // Validation
+      const { error } = deleteReservaValidation(req.query);
+      if (error) return res.status(400).json(error.message);
+
+      try {
+          const { idCalendarioMenu } = req.query
+
+          const pedido = await prisma.calendariomenu.update({
+              where: {
+                  idCalendarioMenu: parseInt(idCalendarioMenu as string)
+              },
+              data: {
+                  estado: 3
+              }
+          })
+
+          return res.json(pedido);
+      } catch (e) {
+          console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+      }
+  }
+
+  

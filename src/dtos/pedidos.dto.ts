@@ -31,4 +31,13 @@ export const getReservaValidation = (data: any) => {
     return pedidoSchema.validate(data);
 }
 
+export const deleteReservaValidation = (data: any) => {
+    const pedidoSchema = Joi.object({
+        idCalendarioMenu: Joi
+            .string()
+            .required(),
+    });
+    return pedidoSchema.validate(data);
+}
+
 
