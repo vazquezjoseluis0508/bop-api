@@ -1,38 +1,43 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client'
+import prismaConfig from '../db/prisma.config';
 
-const prisma = new PrismaClient()
+
 
 
 export const signin = async (req: Request, res: Response) => {
 
     try {
-        const { usr, password } = req.body;
-        const user = await prisma.usuarios.findFirst({
-            where: {
-                usr
+        const { usuario, password } = req.body;
+        if (!usuario || !password) return res.status(400).json({message: 'Usuario o password invalido'});
+        
+        const user = await prismaConfig.usuarios.findMany(
+            {
+                where: {
+                    usr: usuario
+                }
             }
-        });
+        );
 
-        if (!user) return res.status(401).json({message: 'Usuario o password invalido'});
 
-        const correctPassword = await validationPassword(user.clave, password);
+        if (user.length === 0) return res.status(401).json({message: 'Usuario o password invalido'});
+
+        const correctPassword = await validationPassword(user[0].clave, password);
         if (!correctPassword) return res.status(401).json({message: 'Usuario o password invalido'});
 
         // Create a Token
-        const token: string = jwt.sign({ _id: user.idUsuarios }, process.env['TOKEN_SECRET'] || '', {
+        const token: string = jwt.sign({ _id: user[0].idUsuarios }, process.env['TOKEN_SECRET'] || '', {
             // expiresIn: 1800 // 30 minutes
             expiresIn: 86400 // 24 hours
             });
         const response = {
-            idUsuarios: user.idUsuarios,
+            idUsuarios: user[0].idUsuarios,
             access_token: token,
-            legajo: user.legajo,
-            usr: user.usr,
-            nombre: user.nombre,
-            permiso_id: user.permisos_id,
+            legajo: user[0].legajo,
+            usr: user[0].usr,
+            nombre: user[0].nombre,
+            permiso_id: user[0].permisos_id,
             message: 'Login Successfull'            
         }
 
@@ -47,7 +52,7 @@ export const signin = async (req: Request, res: Response) => {
 export const profile = async (req: Request, res: Response) => {
     try {
 
-        const user: any = await prisma.usuarios.findUnique({
+        const user: any = await prismaConfig.usuarios.findUnique({
             where: {
                 idUsuarios: parseInt(req.userId),
             },
