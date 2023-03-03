@@ -1,9 +1,8 @@
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
 import { isDate } from 'class-validator'
+import prismaConfig from '../db/prisma.config'
 
 
-const prisma = new PrismaClient()
 
 
 export async function getMenus(req: Request, res: Response): Promise<Response | void> {
@@ -11,12 +10,14 @@ export async function getMenus(req: Request, res: Response): Promise<Response | 
 
         // current month
         const currentMonth = new Date().getMonth() + 1
+        const yesterday = new Date(new Date().setDate(new Date().getDate() - 1))
 
-        const menus = await prisma.menu_personal.findMany({
+        const menus = await prismaConfig.menu_personal.findMany({
             where: { 
                 estado: 1, 
                 fecha_menu: { 
-                gte: new Date(new Date().getFullYear(), currentMonth - 1, 1) } 
+                // gte: new Date(new Date().getFullYear(), currentMonth - 1, 1) } 
+                gte: yesterday }
             },
             orderBy: { fecha_menu: 'desc' },
             take: 1000
@@ -37,7 +38,7 @@ export async function getMenuByDate(req: Request, res: Response): Promise<Respon
         if (!isDate(fecha)) {
             return res.status(400).json({ message: 'La fecha no es valida' })
         }
-        const menu = await prisma.menu_personal.findMany({
+        const menu = await prismaConfig.menu_personal.findMany({
             where: { fecha_menu: fecha, estado: 1 } // 2021-08-01
         })
 
@@ -51,7 +52,7 @@ export async function getMenuByDate(req: Request, res: Response): Promise<Respon
 
 export async function getParametrosMenu(req: Request, res: Response): Promise<Response | void> {
     try {
-        const parametrosMenu = await prisma.parametro_menu.findFirst({
+        const parametrosMenu = await prismaConfig.parametro_menu.findFirst({
             where: { estado: 1 }
         })
         return res.json(parametrosMenu);

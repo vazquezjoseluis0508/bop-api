@@ -119,8 +119,9 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
 
         return res.json(pedidos);
     }
-    catch (e) {
+    catch (e:any) {
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+        return res.status(400).json(e.message);
     }
 }
 
