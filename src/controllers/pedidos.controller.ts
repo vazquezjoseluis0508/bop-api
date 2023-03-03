@@ -105,19 +105,32 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
 
         const after30Days = new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-
-        const pedidos = await prisma.calendariomenu.findMany({
-            where: { 
+        let where
+        if(legajo) {
+            where = {
                 estado: 2,
                 legajo: String(legajo),
-                // start: {
-                //     gte: date,
-                //     lte: after30Days
-                // }
-             }
+                start: {
+                    gte: date,
+                    lte: after30Days
+                }
+            }
+        } else {
+            where = {
+                estado: 2,
+                start: {
+                    gte: date,
+                    lte: after30Days
+                }
+            }
+        }
+
+
+        const reservas = await prisma.calendariomenu.findMany({
+            where: where,
         })
 
-        return res.json(pedidos);
+        return res.json(reservas);
     }
     catch (e:any) {
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
