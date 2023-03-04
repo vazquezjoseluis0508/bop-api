@@ -1,6 +1,9 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { deleteReservaValidation, getReservaValidation, reservaValidation } from '../dtos/pedidos.dto';
+import { Server as SocketServer } from 'socket.io'
+
+
 
 
 const prisma = new PrismaClient({
@@ -32,6 +35,8 @@ const prisma = new PrismaClient({
 
 
 
+    
+
 
 export async function reservarMenu(req: Request, res: Response): Promise<Response | void> {
 
@@ -60,7 +65,6 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
         });
         if (!menu) return res.status(400).json('Menu no encontrado');
 
-        console.log("servidor: ",  new Date(fecha))
 
         // save reserva menu 
         const calendario_menu = await prisma.calendariomenu.create({
@@ -84,6 +88,9 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
 
 
         })
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('nueva-reserva', calendario_menu);
 
         return res.json(calendario_menu);
     }

@@ -24,7 +24,8 @@
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
     "password_hash": "^1.1.0",
-    "prisma-joi-generator": "^0.2.0"
+    "prisma-joi-generator": "^0.2.0",
+    "socket.io": "^4.6.1"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^9.1.7",

@@ -8,7 +8,8 @@ import UsuariosRoutes from './routes/usuarios.routes'
 import authRoutes from './routes/auth.routes'
 import menuRoutes from './routes/menu.routes'
 import pedidosRoutes from './routes/pedidos.routes'
-import { PrismaClient } from '@prisma/client'
+import http from 'http'
+import { Server as SocketServer } from 'socket.io'
 
 const origin = process.env['ORIGIN'] || 'http://localhost:3001';
 export const corsOptions: CorsOptions = {
@@ -50,7 +51,23 @@ export class App {
     }
 
     async listen(): Promise<void> {
-        await this.app.listen(this.app.get('port'));
+        
+        const server = http.createServer(this.app);
+        const io = new SocketServer(server, {
+            cors: {
+                origin: '*',
+            },
+            });
+        io.on('connection', (socket) => {
+            console.log(`a user ${socket.id} connected`);
+            socket.on('disconnect', () => {
+                console.log(`user ${socket.id} disconnected`);
+            });
+        });
+
+        this.app.set('io', io);
+
+        await server.listen(this.app.get('port'));
         console.log('Server on port', this.app.get('port'));
     }
 
