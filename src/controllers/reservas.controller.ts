@@ -7,31 +7,31 @@ import { Server as SocketServer } from 'socket.io'
 
 
 const prisma = new PrismaClient({
-    log: [
-      {
-        emit: 'event',
-        level: 'query',
-      },
-      {
-        emit: 'stdout',
-        level: 'error',
-      },
-      {
-        emit: 'stdout',
-        level: 'info',
-      },
-      {
-        emit: 'stdout',
-        level: 'warn',
-      },
-    ],
+    // log: [
+    //   {
+    //     emit: 'event',
+    //     level: 'query',
+    //   },
+    //   {
+    //     emit: 'stdout',
+    //     level: 'error',
+    //   },
+    //   {
+    //     emit: 'stdout',
+    //     level: 'info',
+    //   },
+    //   {
+    //     emit: 'stdout',
+    //     level: 'warn',
+    //   },
+    // ],
   })
   
-  prisma.$on('query', (e) => {
-    console.log('Query: ' + e.query)
-    console.log('Params: ' + e.params)
-    console.log('Duration: ' + e.duration + 'ms')
-  })
+//   prisma.$on('query', (e) => {
+//     console.log('Query: ' + e.query)
+//     console.log('Params: ' + e.params)
+//     console.log('Duration: ' + e.duration + 'ms')
+//   })
 
 
 
@@ -65,29 +65,59 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
         });
         if (!menu) return res.status(400).json('Menu no encontrado');
 
-
-        // save reserva menu 
-        const calendario_menu = await prisma.calendariomenu.create({
-            data: {
+        // busca un menu reservado en el mismo dia y turno
+        const menuReservado = await prisma.calendariomenu.findMany({
+            where: {
                 legajo: user.legajo,
-                persona_str: user.nombre,
-                title: menu.descripcion,
-                descripcion: 'Reserva de menu',
                 start: new Date(fecha),
-                color: '#FF0000',
-                textColor: '#FFFFFF',
-                end: new Date(fecha),
-                idMenu: parseInt(idMenu),
-                idMenuBingo: 0,
-                turno: turno,
-                estado: 2, // 1: pendiente, 2: reservado, 3: cancelado
-                f_registro: new Date(),
-
+                estado: 2
             }
+        });
+        let calendario_menu: any;
+
+        if (menuReservado.length > 0){
+            // modificar el menu reservado
+            calendario_menu = await prisma.calendariomenu.update({
+                where: {
+                    idCalendarioMenu: menuReservado[0].idCalendarioMenu
+                },
+                data: {
+                    idMenu: parseInt(idMenu),
+                    title: menu.descripcion,
+                    descripcion: 'Menu modificado',
+                    color: '#FF0000',
+                    textColor: '#FFFFFF',
+                    idMenuBingo: 0,
+                    estado: 2, // 1: pendiente, 2: reservado, 3: cancelado
+                    f_registro: new Date(),
+                    turno: turno
+                }
+            })
 
 
-
-        })
+        } else {
+            // crear reserva
+            calendario_menu = await prisma.calendariomenu.create({
+                data: {
+                    legajo: user.legajo,
+                    persona_str: user.nombre,
+                    title: menu.descripcion,
+                    descripcion: 'Reserva de menu',
+                    start: new Date(fecha),
+                    color: '#FF0000',
+                    textColor: '#FFFFFF',
+                    end: new Date(fecha),
+                    idMenu: parseInt(idMenu),
+                    idMenuBingo: 0,
+                    turno: turno,
+                    estado: 2, // 1: pendiente, 2: reservado, 3: cancelado
+                    f_registro: new Date(),
+    
+                }
+    
+            })
+    
+        }
 
         const io: SocketServer = req.app.get('io');
         io.emit('nueva-reserva', calendario_menu);
@@ -162,6 +192,9 @@ export async function eliminarReserva (req: Request, res: Response): Promise<Res
                   estado: 3
               }
           })
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('elimina-reserva', pedido);
 
           return res.json(pedido);
       } catch (e) {
