@@ -25,7 +25,8 @@
     "morgan": "^1.10.0",
     "password_hash": "^1.1.0",
     "prisma-joi-generator": "^0.2.0",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.6.1",
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^9.1.7",
@@ -35,11 +36,11 @@
     "@types/hapi__joi": "^17.1.8",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/morgan": "^1.9.3",
-    "nodemon": "^2.0.16",
+    "nodemon": "^2.0.21",
     "prisma": "^3.15.2",
     "prisma-class-generator": "^0.2.1",
     "prisma-class-validator-generator": "^0.2.0",
-    "prisma-dbml-generator": "^0.9.1",
+    "prisma-dbml-generator": "^0.10.0",
     "prisma-docs-generator": "^0.5.0",
     "prisma-erd-generator": "^1.2.2",
     "ts-node": "^10.8.1"
