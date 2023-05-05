@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { deleteReservaValidation, getReservaValidation, reservaValidation } from '../dtos/pedidos.dto';
+import { deleteReservaValidation, getReservaValidation, pedidoCanceladoValidation, pedidoRealizadoValidation, reservaValidation } from '../dtos/pedidos.dto';
 import { Server as SocketServer } from 'socket.io'
 
 
@@ -55,6 +55,8 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
             }
         });
 
+        // TODO: Falta obtener el id de persona y la persona_str por medio del legajo
+
         if (!user) return res.status(400).json('Usuario no encontrado');
 
         // get menu
@@ -65,17 +67,35 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
         });
         if (!menu) return res.status(400).json('Menu no encontrado');
 
+
+        // primero obtengo el valor del menu externo con el id mas alto
+        const valor_menu = await prisma.valormenu.findMany({
+            orderBy: {
+                idValorMenu: 'desc'
+            },
+            take: 1
+        });
+
+
         // busca un menu reservado en el mismo dia y turno
         const menuReservado = await prisma.calendariomenu.findMany({
             where: {
                 legajo: user.legajo,
                 start: new Date(fecha),
-                estado: 2
+                estado: {
+                    in: [2, 3, 4]
+                }
             }
         });
         let calendario_menu: any;
+        let pedido: any;
 
         if (menuReservado.length > 0){
+
+            if (menuReservado[0].estado === 3 || menuReservado[0].estado === 4) {
+                return res.status(400).json('No es posible realizar la reserva en la misma fecha con un pedido en estado 3, realizado');
+            }
+
             // modificar el menu reservado
             calendario_menu = await prisma.calendariomenu.update({
                 where: {
@@ -88,15 +108,42 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
                     color: '#FF0000',
                     textColor: '#FFFFFF',
                     idMenuBingo: 0,
-                    estado: 2, // 1: pendiente, 2: reservado, 3: cancelado
+                    estado: 2, // 1: pendiente, 2: reservado, 3: retirado, 4: cancelado
                     f_registro: new Date(),
                     turno: turno
                 }
             })
 
+            pedido = await prisma.pedido.findMany({
+                where: {
+                    usuario: parseInt(usuario),
+                    idCalendarioMenu: menuReservado[0].idCalendarioMenu,
+                    estado: 2
+                    
+                }
+            })
+
+            if (pedido.length > 0){
+
+                pedido = await prisma.pedido.update({
+                    where: {
+                        idPedido: pedido[0].idPedido
+                    },
+                    data: {
+                        idMenu: parseInt(idMenu),
+                        idMenuBingo: null,
+                        importe_externo: valor_menu[0].importe_externo,
+                        importe_interno: null,
+                        turno: turno,
+                        estado: 2,
+                        f_registro: new Date(),
+                    }
+                })
+            }
+
 
         } else {
-            // crear reserva
+            // crear reserva en calendario menu
             calendario_menu = await prisma.calendariomenu.create({
                 data: {
                     legajo: user.legajo,
@@ -110,17 +157,41 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
                     idMenu: parseInt(idMenu),
                     idMenuBingo: 0,
                     turno: turno,
-                    estado: 2, // 1: pendiente, 2: reservado, 3: cancelado
+                    estado: 2, // 1: pendiente, 2: reservado, 3: retirado, 4: cancelado
                     f_registro: new Date(),
     
                 }
     
             })
+
+            // crear pedido en tabla pedido
+
+            pedido = await prisma.pedido.create({
+                data: {
+                    legajo: user.legajo,
+                    persona: null,
+                    persona_str: user.nombre,
+                    descripcion: '',
+                    idMenu: parseInt(idMenu),
+                    idMenuBingo: null,
+                    usuario: user.idUsuarios,
+                    importe_externo: valor_menu[0].importe_externo,
+                    importe_interno: null,
+                    turno: turno,
+                    estado: 2,
+                    f_registro: new Date(),
+                    idCalendarioMenu: calendario_menu.idCalendarioMenu
+                }
+            })
+
     
         }
 
+        // agregar el pedido al calendario_menu
+        calendario_menu.idPedido = pedido.idPedido;
+
         const io: SocketServer = req.app.get('io');
-        io.emit('nueva-reserva', calendario_menu);
+        io.emit('nueva-reserva',  calendario_menu);
 
         return res.json(calendario_menu);
     }
@@ -163,9 +234,24 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
         }
 
 
-        const reservas = await prisma.calendariomenu.findMany({
+        let reservas: any = await prisma.calendariomenu.findMany({
             where: where,
         })
+
+
+        // agregar pedido a cada reserva
+        if (reservas.length === 0) return res.json(reservas);
+
+        for (let i = 0; i < reservas.length; i++) {
+            const reserva = reservas[i];
+            const pedido = await prisma.pedido.findMany({
+                where: {
+                    idCalendarioMenu: reserva.idCalendarioMenu
+                }
+            })
+            reservas[i].idPedido = pedido[0].idPedido
+        }
+
 
         return res.json(reservas);
     }
@@ -202,4 +288,76 @@ export async function eliminarReserva (req: Request, res: Response): Promise<Res
       }
   }
 
-  
+export async function pedidoRealizado ( req: Request, res: Response): Promise<Response | void> {
+    // Validation
+    const { error } = pedidoRealizadoValidation(req.body);
+    if (error) return res.status(400).json(error.message);
+
+    try {
+        const { idPedido, idCalendarioMenu } = req.body
+
+        const pedido = await prisma.pedido.update({
+            where: {
+                idPedido: parseInt(idPedido)
+            },
+            data: {
+                estado: 3
+            }
+        })
+
+        const calendario_menu = await prisma.calendariomenu.update({
+            where: {
+                idCalendarioMenu: parseInt(idCalendarioMenu)
+            },
+            data: {
+                estado: 3
+            }
+        })
+
+
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('pedido-realizado', { pedido, calendario_menu });
+
+        return res.json(pedido);
+    } catch (e) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+    }
+}
+
+export async function pedidoCancelado ( req: Request, res: Response): Promise<Response | void> {
+    // Validation
+    const { error } = pedidoCanceladoValidation(req.body);
+    if (error) return res.status(400).json(error.message);
+
+    try {
+        const { idPedido, idCalendarioMenu } = req.body
+
+        const pedido = await prisma.pedido.update({
+            where: {
+                idPedido: parseInt(idPedido)
+            },
+            data: {
+                estado: 4
+            }
+        })
+
+        const calendario_menu = await prisma.calendariomenu.update({
+            where: {
+                idCalendarioMenu: parseInt(idCalendarioMenu)
+            },
+            data: {
+                estado: 4
+            }
+        })
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('pedido-cancelado', { pedido, calendario_menu });
+
+        return res.json(pedido);
+    } catch (e) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+    }
+}
+
+

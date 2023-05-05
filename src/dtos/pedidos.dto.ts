@@ -40,4 +40,40 @@ export const deleteReservaValidation = (data: any) => {
     return pedidoSchema.validate(data);
 }
 
+export const updateReservaValidation = (data: any) => {
+    const pedidoSchema = Joi.object({
+        idCalendarioMenu: Joi
+            .string()
+            .required(),
+        estado: Joi
+            .number()
+            .required(),
+    });
+    return pedidoSchema.validate(data);
+}
+
+export const pedidoRealizadoValidation = (data: any) => {
+    const pedidoSchema = Joi.object({
+        idCalendarioMenu: Joi
+            .number()
+            .required(),
+        idPedido: Joi
+            .number()
+            .required()
+    });
+    return pedidoSchema.validate(data);
+}
+
+
+export const pedidoCanceladoValidation = (data: any) => {
+    const pedidoSchema = Joi.object({
+        idCalendarioMenu: Joi
+            .number()
+            .required(),
+        idPedido: Joi
+            .number()
+            .required()
+    });
+    return pedidoSchema.validate(data);
+}
 
