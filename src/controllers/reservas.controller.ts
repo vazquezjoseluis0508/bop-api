@@ -216,7 +216,9 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
         let where
         if(legajo) {
             where = {
-                estado: 2,
+                estado: {
+                    in: [2, 3, 4]
+                },
                 legajo: String(legajo),
                 start: {
                     gte: date,
