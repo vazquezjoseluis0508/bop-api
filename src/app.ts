@@ -58,7 +58,7 @@ export class App {
                 origin: '*',
             },
             });
-        io.on('connection', (socket) => {
+        io.on('connection', (socket: any) => {
             console.log(`a user ${socket.id} connected`);
             socket.on('disconnect', () => {
                 console.log(`user ${socket.id} disconnected`);

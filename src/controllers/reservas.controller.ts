@@ -272,19 +272,32 @@ export async function eliminarReserva (req: Request, res: Response): Promise<Res
       try {
           const { idCalendarioMenu } = req.query
 
-          const pedido = await prisma.calendariomenu.update({
-              where: {
-                  idCalendarioMenu: parseInt(idCalendarioMenu as string)
-              },
-              data: {
-                  estado: 3
-              }
+
+          const calendarioMenu = await prisma.calendariomenu.delete({
+            where:{
+                idCalendarioMenu: parseInt (idCalendarioMenu as string),
+            }
           })
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('elimina-reserva', pedido);
+          const pedido = await prisma.pedido.findFirst({
+            where: {
+                idCalendarioMenu: parseInt( idCalendarioMenu as string)
+            }
+          })
 
-          return res.json(pedido);
+          const delete_pedido = await prisma.pedido.delete(
+            {
+                where: {
+                    idPedido: pedido?.idPedido
+                }
+            }
+          )
+
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('elimina-reserva', calendarioMenu);
+
+          return res.json(calendarioMenu);
       } catch (e) {
           console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
       }
