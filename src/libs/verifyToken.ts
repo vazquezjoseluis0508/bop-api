@@ -14,7 +14,7 @@ export const TokenValidation = (req: Request, res: Response, next: NextFunction)
         const payload = jwt.verify(bearerToken, process.env['TOKEN_SECRET'] || '') as IPayload;
         req.userId = payload._id;
         next();
-    } catch (e) {
-        res.status(400).send('Invalid Token');
+    } catch (e: any) {
+        res.status(400).send(`Invalid Token: ${e.message}`);
     }
 }

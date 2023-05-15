@@ -8,6 +8,7 @@ import UsuariosRoutes from './routes/usuarios.routes'
 import authRoutes from './routes/auth.routes'
 import menuRoutes from './routes/menu.routes'
 import pedidosRoutes from './routes/pedidos.routes'
+import scannerRoutes from './routes/scanner.routes'
 import http from 'http'
 import { Server as SocketServer } from 'socket.io'
 
@@ -48,6 +49,7 @@ export class App {
         this.app.use('/api/auth', authRoutes);
         this.app.use('/api/menu', menuRoutes);
         this.app.use('/api/pedidos', pedidosRoutes); // <--- Agregado
+        this.app.use('/api/scanner', scannerRoutes);
     }
 
     async listen(): Promise<void> {

@@ -635,6 +635,7 @@ model usuarios {
   permisos_id    Int
   fecha_registro DateTime @db.Date
   legajo         String?  @db.VarChar(7)
+  historial_escaneo      historial_escaneo[]
 
   @@index([permisos_id], map: "fk_usuarios_permissoes1_idx")
 }
@@ -722,4 +723,27 @@ model puesto {
   idPuesto    Int     @id @default(autoincrement())
   descripcion String? @db.VarChar(100)
   eliminado   Int?
+}
+
+model clientes {
+  id                Int    @id @default(autoincrement())
+  codigo            String @unique
+  apellido          String
+  nombre            String
+  sexo              String
+  documento         String
+  ejemplar          String
+  fecha_nacimiento  DateTime
+  fecha_emision     DateTime
+  fecha_registro    DateTime @default(now())
+  historial_escaneo historial_escaneo[]
+}
+
+model historial_escaneo {
+  id            Int      @id @default(autoincrement())
+  cliente_id    Int
+  usuario_id    Int
+  fecha_escaneo DateTime @default(now())
+  cliente       clientes  @relation(fields: [cliente_id], references: [id])
+  usuario       usuarios @relation(fields: [usuario_id], references: [idUsuarios])
 }
