@@ -4,19 +4,22 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient({})
   
 
-export async function getHistorial ( req: Request, res: Response): Promise<Response | void> {
+export async function getHistorial(req: Request, res: Response): Promise<Response | void> {
     try {
-        const date = new Date();
-        const before2Days = new Date(date.getTime() - 2 * 24 * 60 * 60 * 1000);
-        const historial = await prisma.historial_escaneo.findMany()
+        const historial = await prisma.historial_escaneo.findMany({
+            include: {
+                cliente: true,
+                usuario: true,
+            },
+        });
+        
         return res.json(historial);
-    }
-    catch (e:any) {
-        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+    } catch (e: any) {
+        console.log("Error en getHistorial: ", e);
         return res.status(400).json(e.message);
     }
 }
-        
+  
 
 export async function escanearCliente(req: Request, res: Response): Promise<Response | void> {
     // Datos del escaneo
