@@ -208,6 +208,8 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
 
     try {
         const { legajo } = req.query
+        // ayer
+        const yesterday = new Date(new Date().setDate(new Date().getDate() - 1))
 
         const date = new Date();
 
@@ -221,7 +223,7 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
                 },
                 legajo: String(legajo),
                 start: {
-                    gte: date,
+                    gte: yesterday,
                     lte: after30Days
                 }
             }
@@ -229,7 +231,7 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
             where = {
                 estado: 2,
                 start: {
-                    gte: date,
+                    gte: yesterday,
                     lte: after30Days
                 }
             }
@@ -246,12 +248,13 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
 
         for (let i = 0; i < reservas.length; i++) {
             const reserva = reservas[i];
-            const pedido = await prisma.pedido.findMany({
-                where: {
-                    idCalendarioMenu: reserva.idCalendarioMenu
-                }
-            })
-            reservas[i].idPedido = pedido[0].idPedido
+            // const pedido = await prisma.pedido.findMany({
+            //     where: {
+            //         idCalendarioMenu: reserva.idCalendarioMenu
+            //     }
+            // })
+            // reservas[i].idPedido = pedido[0].idPedido
+            reservas[i].idPedido = null
         }
 
 
