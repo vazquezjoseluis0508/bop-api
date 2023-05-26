@@ -56,10 +56,8 @@ export const pedidoRealizadoValidation = (data: any) => {
     const pedidoSchema = Joi.object({
         idCalendarioMenu: Joi
             .number()
-            .required(),
-        idPedido: Joi
-            .number()
             .required()
+
     });
     return pedidoSchema.validate(data);
 }
@@ -68,9 +66,6 @@ export const pedidoRealizadoValidation = (data: any) => {
 export const pedidoCanceladoValidation = (data: any) => {
     const pedidoSchema = Joi.object({
         idCalendarioMenu: Joi
-            .number()
-            .required(),
-        idPedido: Joi
             .number()
             .required()
     });

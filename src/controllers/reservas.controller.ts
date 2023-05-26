@@ -243,20 +243,6 @@ export async function getReservas (req: Request, res: Response): Promise<Respons
         })
 
 
-        // agregar pedido a cada reserva
-        if (reservas.length === 0) return res.json(reservas);
-
-        for (let i = 0; i < reservas.length; i++) {
-            const reserva = reservas[i];
-            // const pedido = await prisma.pedido.findMany({
-            //     where: {
-            //         idCalendarioMenu: reserva.idCalendarioMenu
-            //     }
-            // })
-            // reservas[i].idPedido = pedido[0].idPedido
-            reservas[i].idPedido = null
-        }
-
 
         return res.json(reservas);
     }
@@ -312,14 +298,20 @@ export async function pedidoRealizado ( req: Request, res: Response): Promise<Re
     if (error) return res.status(400).json(error.message);
 
     try {
-        const { idPedido, idCalendarioMenu } = req.body
+        const { idCalendarioMenu } = req.body
 
-        const pedido = await prisma.pedido.update({
+        const pedido = await prisma.pedido.findFirst({
             where: {
-                idPedido: parseInt(idPedido)
+                idCalendarioMenu: parseInt(idCalendarioMenu)
+            }
+        })
+
+        const pedido_update = await prisma.pedido.update({
+            where: {
+                idPedido: pedido?.idPedido
             },
             data: {
-                estado: 3
+                estado: 3,
             }
         })
 
@@ -349,11 +341,17 @@ export async function pedidoCancelado ( req: Request, res: Response): Promise<Re
     if (error) return res.status(400).json(error.message);
 
     try {
-        const { idPedido, idCalendarioMenu } = req.body
+        const {  idCalendarioMenu } = req.body
 
-        const pedido = await prisma.pedido.update({
+        const pedido = await prisma.pedido.findFirst({
             where: {
-                idPedido: parseInt(idPedido)
+                idCalendarioMenu: parseInt(idCalendarioMenu)
+            }
+        })
+
+        const pedido_update = await prisma.pedido.update({
+            where: {
+                idPedido: pedido?.idPedido
             },
             data: {
                 estado: 4

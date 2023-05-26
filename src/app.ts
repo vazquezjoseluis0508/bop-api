@@ -1,6 +1,9 @@
 import express, { Application } from 'express'
 import morgan from 'morgan'
 import cors, { CorsOptions } from 'cors'
+import https from 'https';
+import fs from 'fs';
+
 
 // Routes
 import IndexRoutes from './routes/index.routes'
@@ -12,11 +15,6 @@ import scannerRoutes from './routes/scanner.routes'
 import http from 'http'
 import { Server as SocketServer } from 'socket.io'
 
-const origin = process.env['ORIGIN'] || 'http://localhost:3001';
-export const corsOptions: CorsOptions = {
-    origin: [origin],
-    credentials: true,
-};
 
 
 
@@ -38,7 +36,11 @@ export class App {
     }
 
     private middlewares() {
-        this.app.use(cors())
+        this.app.use(cors({
+            origin: '*',
+            credentials: true,
+        }));
+        
         this.app.use(morgan('dev'));
         this.app.use(express.json());
     }
@@ -53,22 +55,30 @@ export class App {
     }
 
     async listen(): Promise<void> {
-        
-        const server = http.createServer(this.app);
+        const options = {
+            pfx: fs.readFileSync('bingopilar.pfx'),
+            passphrase: 'controlapp'
+        };
+    
+        const server = https.createServer(options, this.app);
+    
         const io = new SocketServer(server, {
             cors: {
                 origin: '*',
+                methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+                credentials: true,
             },
-            });
+        });
+    
         io.on('connection', (socket: any) => {
             console.log(`a user ${socket.id} connected`);
             socket.on('disconnect', () => {
                 console.log(`user ${socket.id} disconnected`);
             });
         });
-
+    
         this.app.set('io', io);
-
+    
         await server.listen(this.app.get('port'));
         console.log('Server on port', this.app.get('port'));
     }
