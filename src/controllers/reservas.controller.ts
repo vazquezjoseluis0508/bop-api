@@ -341,7 +341,8 @@ export async function pedidoCancelado ( req: Request, res: Response): Promise<Re
     if (error) return res.status(400).json(error.message);
 
     try {
-        const {  idCalendarioMenu } = req.body
+        const {  idCalendarioMenu, motivo } = req.body
+        const motivo_cancelacion = motivo ? motivo : ''
 
         const pedido = await prisma.pedido.findFirst({
             where: {
@@ -354,7 +355,8 @@ export async function pedidoCancelado ( req: Request, res: Response): Promise<Re
                 idPedido: pedido?.idPedido
             },
             data: {
-                estado: 4
+                estado: 4,
+                descripcion: motivo_cancelacion
             }
         })
 
@@ -363,7 +365,8 @@ export async function pedidoCancelado ( req: Request, res: Response): Promise<Re
                 idCalendarioMenu: parseInt(idCalendarioMenu)
             },
             data: {
-                estado: 4
+                estado: 4,
+                descripcion: motivo_cancelacion
             }
         })
 

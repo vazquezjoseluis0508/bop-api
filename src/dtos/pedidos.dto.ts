@@ -67,7 +67,10 @@ export const pedidoCanceladoValidation = (data: any) => {
     const pedidoSchema = Joi.object({
         idCalendarioMenu: Joi
             .number()
-            .required()
+            .required(),
+        motivo: Joi 
+            .string()
+            .optional()
     });
     return pedidoSchema.validate(data);
 }
