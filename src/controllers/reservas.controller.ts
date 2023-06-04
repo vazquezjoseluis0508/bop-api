@@ -3,40 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { deleteReservaValidation, getReservaValidation, pedidoCanceladoValidation, pedidoRealizadoValidation, reservaValidation } from '../dtos/pedidos.dto';
 import { Server as SocketServer } from 'socket.io'
 
-
-
-
-const prisma = new PrismaClient({
-    // log: [
-    //   {
-    //     emit: 'event',
-    //     level: 'query',
-    //   },
-    //   {
-    //     emit: 'stdout',
-    //     level: 'error',
-    //   },
-    //   {
-    //     emit: 'stdout',
-    //     level: 'info',
-    //   },
-    //   {
-    //     emit: 'stdout',
-    //     level: 'warn',
-    //   },
-    // ],
-})
-
-//   prisma.$on('query', (e) => {
-//     console.log('Query: ' + e.query)
-//     console.log('Params: ' + e.params)
-//     console.log('Duration: ' + e.duration + 'ms')
-//   })
-
-
-
-
-
+const prisma = new PrismaClient({})
 
 export async function reservarMenu(req: Request, res: Response): Promise<Response | void> {
 
@@ -45,7 +12,6 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
     if (error) return res.status(400).json(error.message);
 
     try {
-
 
         const { idMenu, turno, usuario, fecha } = req.body
         // get user
@@ -377,7 +343,6 @@ export async function pedidoRealizado(req: Request, res: Response): Promise<Resp
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
 }
-
 
 export async function pedidoCancelado(req: Request, res: Response): Promise<Response | void> {
     // Validation
