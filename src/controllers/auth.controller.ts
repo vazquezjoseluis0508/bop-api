@@ -15,7 +15,8 @@ export const signin = async (req: Request, res: Response) => {
         const user = await prismaConfig.usuarios.findMany(
             {
                 where: {
-                    usr: usuario
+                    usr: usuario,
+                    estado: true
                 }
             }
         );
