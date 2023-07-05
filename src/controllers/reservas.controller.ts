@@ -5,7 +5,102 @@ import { Server as SocketServer } from 'socket.io'
 
 const prisma = new PrismaClient({})
 
-export async function reservarMenu(req: Request, res: Response): Promise<Response | void> {
+
+
+export async function getReservas(req: Request, res: Response): Promise<Response | void> {
+
+    // Validation
+    const { error } = getReservaValidation(req.query);
+    if (error) throw new Error(error.message);
+
+    try {
+        const { legajo } = req.query
+        // ayer
+        const yesterday = new Date(new Date().setDate(new Date().getDate() - 2))
+
+        const date = new Date();
+
+        const after30Days = new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+        let where
+        if (legajo) {
+            where = {
+                estado: {
+                    in: [2, 3, 4, 15] // 2: reservado, 3: retirado, 4: cancelado, 15: realizado
+                },
+                legajo: String(legajo),
+                start: {
+                    gte: yesterday,
+                    lte: after30Days
+                }
+            }
+        } else {
+            where = {
+                estado: 2,
+                start: {
+                    gte: yesterday,
+                    lte: after30Days
+                }
+            }
+        }
+
+
+        let reservas: any = await prisma.calendariomenu.findMany({
+            where: where,
+        })
+
+
+
+        return res.json(reservas);
+    }
+    catch (e: any) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+        return res.status(400).json(e.message);
+    }
+}
+
+export async function eliminarReserva(req: Request, res: Response): Promise<Response | void> {
+
+    // Validation
+    const { error } = deleteReservaValidation(req.query);
+    if (error) return res.status(400).json(error.message);
+
+    try {
+        const { idCalendarioMenu } = req.query
+
+
+        const calendarioMenu = await prisma.calendariomenu.delete({
+            where: {
+                idCalendarioMenu: parseInt(idCalendarioMenu as string),
+            }
+        })
+
+        const pedido = await prisma.pedido.findFirst({
+            where: {
+                idCalendarioMenu: parseInt(idCalendarioMenu as string)
+            }
+        })
+
+        const delete_pedido = await prisma.pedido.delete(
+            {
+                where: {
+                    idPedido: pedido?.idPedido
+                }
+            }
+        )
+
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('elimina-reserva', calendarioMenu);
+
+        return res.json(calendarioMenu);
+    } catch (e) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+    }
+}
+
+/** Cambia el estado a 2 (reservado) */
+export async function pedidoReservado(req: Request, res: Response): Promise<Response | void> {
 
     // Validation
     const { error } = reservaValidation(req.body);
@@ -166,99 +261,94 @@ export async function reservarMenu(req: Request, res: Response): Promise<Respons
     }
 }
 
-export async function getReservas(req: Request, res: Response): Promise<Response | void> {
-
-    // Validation
-    const { error } = getReservaValidation(req.query);
-    if (error) throw new Error(error.message);
-
-    try {
-        const { legajo } = req.query
-        // ayer
-        const yesterday = new Date(new Date().setDate(new Date().getDate() -2))
-
-        const date = new Date();
-
-        const after30Days = new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-        let where
-        if (legajo) {
-            where = {
-                estado: {
-                    in: [2, 3, 4]
-                },
-                legajo: String(legajo),
-                start: {
-                    gte: yesterday,
-                    lte: after30Days
-                }
-            }
-        } else {
-            where = {
-                estado: 2,
-                start: {
-                    gte: yesterday,
-                    lte: after30Days
-                }
-            }
-        }
-
-
-        let reservas: any = await prisma.calendariomenu.findMany({
-            where: where,
-        })
-
-
-
-        return res.json(reservas);
-    }
-    catch (e: any) {
-        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
-        return res.status(400).json(e.message);
-    }
-}
-
-export async function eliminarReserva(req: Request, res: Response): Promise<Response | void> {
-
-    // Validation
-    const { error } = deleteReservaValidation(req.query);
+/** Cambia el estado a 15 (realizado) */
+export async function pedidoRealizado(req: Request, res: Response): Promise<Response | void> {
+    const { error } = pedidoRealizadoValidation(req.body);
     if (error) return res.status(400).json(error.message);
 
     try {
-        const { idCalendarioMenu } = req.query
+        const { idCalendarioMenu } = req.body;
 
-
-        const calendarioMenu = await prisma.calendariomenu.delete({
+        // obtengo el calendario_menu
+        let calendarioMenu = await prisma.calendariomenu.findFirst({
             where: {
-                idCalendarioMenu: parseInt(idCalendarioMenu as string),
+                idCalendarioMenu: parseInt(idCalendarioMenu)
             }
-        })
+        });
 
-        const pedido = await prisma.pedido.findFirst({
+
+        let pedido = await prisma.pedido.findFirst({
             where: {
-                idCalendarioMenu: parseInt(idCalendarioMenu as string)
+                idCalendarioMenu: parseInt(idCalendarioMenu)
             }
-        })
+        });
 
-        const delete_pedido = await prisma.pedido.delete(
-            {
+        // Si el pedido no existe, crea uno nuevo con estado 3 (opcional)
+        if (!pedido) {
+            const usuario = await prisma.usuarios.findFirst({
                 where: {
-                    idPedido: pedido?.idPedido
+                    legajo: calendarioMenu?.legajo
                 }
-            }
-        )
+            })
 
+            const valor_menu = await prisma.valormenu.findMany({
+                orderBy: {
+                    idValorMenu: 'desc'
+                },
+                take: 1
+            });
+
+            pedido = await prisma.pedido.create({
+                data: {
+                    idCalendarioMenu: parseInt(idCalendarioMenu),
+                    estado: 3,
+                    legajo: calendarioMenu?.legajo,
+                    persona: null,
+                    persona_str: calendarioMenu?.persona_str,
+                    descripcion: '',
+                    idMenu: calendarioMenu?.idMenu,
+                    idMenuBingo: null,
+                    usuario: usuario?.idUsuarios,
+                    importe_externo: valor_menu[0].importe_externo,
+                    importe_interno: null,
+                    turno: calendarioMenu?.turno,
+                    f_registro: new Date(),
+
+                }
+            });
+        }
+        // Si el pedido existe, actualiza su estado
+        else {
+            pedido = await prisma.pedido.update({
+                where: {
+                    idPedido: pedido.idPedido
+                },
+                data: {
+                    estado: 15,
+                }
+            });
+        }
+
+        const calendario_menu = await prisma.calendariomenu.update({
+            where: {
+                idCalendarioMenu: parseInt(idCalendarioMenu)
+            },
+            data: {
+                estado: 15
+            }
+        });
 
         const io: SocketServer = req.app.get('io');
-        io.emit('elimina-reserva', calendarioMenu);
+        io.emit('pedido-realizado', { pedido, calendario_menu });
 
-        return res.json(calendarioMenu);
+        return res.json(pedido);
     } catch (e) {
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
 }
 
-export async function pedidoRealizado(req: Request, res: Response): Promise<Response | void> {
+/** Cambia el estado a 3 (retirado) */
+export async function pedidoRetirado(req: Request, res: Response): Promise<Response | void> {
     // Validation
     const { error } = pedidoRealizadoValidation(req.body);
     if (error) return res.status(400).json(error.message);
@@ -343,7 +433,7 @@ export async function pedidoRealizado(req: Request, res: Response): Promise<Resp
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
 }
-
+/** Cambia el estado a 4 (cancelado) */
 export async function pedidoCancelado(req: Request, res: Response): Promise<Response | void> {
     // Validation
     const { error } = pedidoCanceladoValidation(req.body);
@@ -387,5 +477,27 @@ export async function pedidoCancelado(req: Request, res: Response): Promise<Resp
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
 }
+
+export async function getPedidosMonitor(req: Request, res: Response): Promise<Response | void> {
+    try {
+        const pedidos_realizados = await prisma.calendariomenu.findMany({
+            where: {
+                estado: 15
+            },
+            orderBy: {
+                start: 'desc'
+            },
+            take: 1000
+        })
+
+        return res.json(pedidos_realizados);
+    }
+    catch (e: any) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+        return res.status(400).json(e.message);
+    }
+}
+
+
 
 
