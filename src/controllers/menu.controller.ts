@@ -15,12 +15,13 @@ export async function getMenus(req: Request, res: Response): Promise<Response | 
         const menus = await prismaConfig.menu_personal.findMany({
             where: { 
                 estado: 1, 
-                fecha_menu: { 
-                // gte: new Date(new Date().getFullYear(), currentMonth - 1, 1) } 
-                gte: yesterday }
+                // fecha_menu: { 
+                // // gte: new Date(new Date().getFullYear(), currentMonth - 1, 1) } 
+                // gte: yesterday }
+                
             },
             orderBy: { fecha_menu: 'desc' },
-            take: 1000
+            take: 2000
             
         })
         return res.json(menus);
