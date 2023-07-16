@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, calendariomenu } from '@prisma/client'
 import { deleteReservaValidation, getReservaValidation, pedidoCanceladoValidation, pedidoRealizadoValidation, reservaValidation } from '../dtos/pedidos.dto';
 import { Server as SocketServer } from 'socket.io'
 
@@ -45,9 +45,22 @@ export async function getReservas(req: Request, res: Response): Promise<Response
         }
 
 
-        let reservas: any = await prisma.calendariomenu.findMany({
+        let reservas: calendariomenu[] = await prisma.calendariomenu.findMany({
             where: where,
         })
+
+        // setear el estado del pedido
+        for (let i = 0; i < reservas.length; i++) {
+            const pedido = await prisma.pedido.findFirst({
+                where: {
+                    idCalendarioMenu: reservas[i].idCalendarioMenu
+                }
+            })
+            if (pedido) {
+                reservas[i].estado = pedido.estado
+            }
+        }
+
 
 
 
@@ -329,13 +342,10 @@ export async function pedidoRealizado(req: Request, res: Response): Promise<Resp
             });
         }
 
-        const calendario_menu = await prisma.calendariomenu.update({
+        const calendario_menu = await prisma.calendariomenu.findUnique({
             where: {
                 idCalendarioMenu: parseInt(idCalendarioMenu)
             },
-            data: {
-                estado: 15
-            }
         });
 
         const io: SocketServer = req.app.get('io');
@@ -416,12 +426,9 @@ export async function pedidoRetirado(req: Request, res: Response): Promise<Respo
             });
         }
 
-        const calendario_menu = await prisma.calendariomenu.update({
+        const calendario_menu = await prisma.calendariomenu.findUnique({
             where: {
                 idCalendarioMenu: parseInt(idCalendarioMenu)
-            },
-            data: {
-                estado: 3
             }
         });
 
@@ -459,13 +466,9 @@ export async function pedidoCancelado(req: Request, res: Response): Promise<Resp
             }
         })
 
-        const calendario_menu = await prisma.calendariomenu.update({
+        const calendario_menu = await prisma.calendariomenu.findUnique({
             where: {
                 idCalendarioMenu: parseInt(idCalendarioMenu)
-            },
-            data: {
-                estado: 4,
-                descripcion: motivo_cancelacion
             }
         })
 
