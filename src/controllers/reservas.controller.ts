@@ -182,7 +182,7 @@ export async function pedidoReservado(req: Request, res: Response): Promise<Resp
                     color: '#FF0000',
                     textColor: '#FFFFFF',
                     idMenuBingo: 0,
-                    estado: 2, // 1: pendiente, 2: reservado, 3: retirado, 4: cancelado
+                    estado: 2, // 1: pendiente, 2: reservado, 3: retirado, 4: cancelado, 15: realizado
                     f_registro: new Date(),
                     turno: turno
                 }
@@ -338,6 +338,7 @@ export async function pedidoRealizado(req: Request, res: Response): Promise<Resp
                 },
                 data: {
                     estado: 15,
+                    f_listo: new Date()
                 }
             });
         }
@@ -410,6 +411,7 @@ export async function pedidoRetirado(req: Request, res: Response): Promise<Respo
                     importe_interno: null,
                     turno: calendarioMenu?.turno,
                     f_registro: new Date(),
+                    f_listo: new Date()
 
                 }
             });
@@ -462,7 +464,9 @@ export async function pedidoCancelado(req: Request, res: Response): Promise<Resp
             },
             data: {
                 estado: 4,
-                descripcion: motivo_cancelacion
+                descripcion: motivo_cancelacion,
+                f_listo: new Date()
+                
             }
         })
 
