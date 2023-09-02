@@ -10,7 +10,7 @@ export async function getPreferenciaByUser ( req: Request, res: Response): Promi
         const preferencia = await prisma.preferencia_menu_usuario.findMany({
             where: {
                 legajo: legajo,
-                // estado: 1
+                estado: 1
             },
             orderBy: {
                 fecharegistro: 'desc'
@@ -18,8 +18,13 @@ export async function getPreferenciaByUser ( req: Request, res: Response): Promi
             take: 1000
         })
 
+        // convert array to object
+        const preferencia_object = preferencia.reduce((obj: any, item: any) => {
+            return item
+        }, {})
 
-        return res.json(preferencia);
+
+        return res.json(preferencia_object);
     }
     catch (e: any) {
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
