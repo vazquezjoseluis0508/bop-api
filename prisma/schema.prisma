@@ -90,6 +90,8 @@ model calendariomenu {
   f_registro       DateTime? @db.Date
   idMenuBingo      Int?
   turno            String?   @db.VarChar(50)
+
+  @@unique([legajo, start, estado], map: "uc_legajo_start_estado")
 }
 
 model calendariomenu_old {
@@ -625,17 +627,17 @@ model uniforme_has_persona {
 }
 
 model usuarios {
-  idUsuarios     Int      @id @default(autoincrement())
-  nombre         String   @db.VarChar(80)
-  usr            String   @db.VarChar(80)
-  email          String   @db.VarChar(80)
-  clave          String   @db.VarChar(200)
-  celular        String?  @db.VarChar(20)
-  estado         Boolean
-  permisos_id    Int
-  fecha_registro DateTime @db.Date
-  legajo         String?  @db.VarChar(7)
-  historial_escaneo      historial_escaneo[]
+  idUsuarios        Int                 @id @default(autoincrement())
+  nombre            String              @db.VarChar(80)
+  usr               String              @db.VarChar(80)
+  email             String              @db.VarChar(80)
+  clave             String              @db.VarChar(200)
+  celular           String?             @db.VarChar(20)
+  estado            Boolean
+  permisos_id       Int
+  fecha_registro    DateTime            @db.Date
+  legajo            String?             @db.VarChar(7)
+  historial_escaneo historial_escaneo[]
 
   @@index([permisos_id], map: "fk_usuarios_permissoes1_idx")
 }
@@ -726,24 +728,36 @@ model puesto {
 }
 
 model clientes {
-  id                Int    @id @default(autoincrement())
-  codigo            String @unique
-  apellido          String
-  nombre            String
-  sexo              String
-  documento         String
-  ejemplar          String
-  fecha_nacimiento  DateTime
-  fecha_emision     DateTime
-  fecha_registro    DateTime @default(now())
+  id                Int                 @id @default(autoincrement())
+  codigo            String              @unique(map: "codigo") @db.VarChar(255)
+  apellido          String              @db.VarChar(255)
+  nombre            String              @db.VarChar(255)
+  sexo              String              @db.Char(1)
+  documento         String              @db.VarChar(255)
+  ejemplar          String              @db.Char(1)
+  fecha_nacimiento  DateTime            @db.Date
+  fecha_emision     DateTime            @db.Date
+  fecha_registro    DateTime?           @default(now()) @db.Timestamp(0)
   historial_escaneo historial_escaneo[]
 }
 
 model historial_escaneo {
-  id            Int      @id @default(autoincrement())
-  cliente_id    Int
-  usuario_id    Int
-  fecha_escaneo DateTime @default(now())
-  cliente       clientes  @relation(fields: [cliente_id], references: [id])
-  usuario       usuarios @relation(fields: [usuario_id], references: [idUsuarios])
+  id            Int       @id @default(autoincrement())
+  cliente_id    Int?
+  usuario_id    Int?
+  fecha_escaneo DateTime? @default(now()) @db.Timestamp(0)
+  cliente       clientes? @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "historial_escaneo_ibfk_1")
+  usuario       usuarios? @relation(fields: [usuario_id], references: [idUsuarios], onDelete: NoAction, onUpdate: NoAction, map: "historial_escaneo_ibfk_2")
+
+  @@index([cliente_id], map: "cliente_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model preferencia_menu_usuario {
+  idPreferencia Int       @id @default(autoincrement())
+  idUsuario     Int?
+  legajo        Int?
+  sal           Int?
+  fecharegistro DateTime? @db.Date
+  estado        Int?
 }

@@ -12,7 +12,7 @@ import authRoutes from './routes/auth.routes'
 import menuRoutes from './routes/menu.routes'
 import pedidosRoutes from './routes/pedidos.routes'
 import scannerRoutes from './routes/scanner.routes'
-import http from 'http'
+import preferencia from './routes/preferencia_menu_usuario.routes'
 import { Server as SocketServer } from 'socket.io'
 
 
@@ -50,7 +50,8 @@ export class App {
         this.app.use('/api/usuarios', UsuariosRoutes);
         this.app.use('/api/auth', authRoutes);
         this.app.use('/api/menu', menuRoutes);
-        this.app.use('/api/pedidos', pedidosRoutes); // <--- Agregado
+        this.app.use('/api/pedidos', pedidosRoutes); 
+        this.app.use('/api/preferencia_menu_usuario', preferencia); 
         this.app.use('/api/scanner', scannerRoutes);
     }
 
