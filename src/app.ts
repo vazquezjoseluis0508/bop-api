@@ -1,9 +1,6 @@
 import express, { Application } from 'express'
 import morgan from 'morgan'
-import cors, { CorsOptions } from 'cors'
-import https from 'https';
-import fs from 'fs';
-
+import cors from 'cors'
 
 // Routes
 import IndexRoutes from './routes/index.routes'
@@ -13,7 +10,7 @@ import menuRoutes from './routes/menu.routes'
 import pedidosRoutes from './routes/pedidos.routes'
 import scannerRoutes from './routes/scanner.routes'
 import preferencia from './routes/preferencia_menu_usuario.routes'
-import { Server as SocketServer } from 'socket.io'
+import { Server as HTTPServer } from 'http';
 
 
 
@@ -32,7 +29,7 @@ export class App {
     }
 
     private settings() {
-        this.app.set('port', this.port || process.env.PORT || 3000);
+        this.app.set('port', this.port || process.env.PORT || 3002);
     }
 
     private middlewares() {
@@ -43,6 +40,11 @@ export class App {
         
         this.app.use(morgan('dev'));
         this.app.use(express.json());
+        this.app.use((req, res, next) => {
+            console.log(`${req.method} ${req.path}`);
+            next();
+        });
+          
     }
 
     private routes() {
@@ -56,29 +58,8 @@ export class App {
     }
 
     async listen(): Promise<void> {
-        const options = {
-            pfx: fs.readFileSync('bingopilar.pfx'),
-            passphrase: 'controlapp'
-        };
-    
-        const server = https.createServer(options, this.app);
-    
-        const io = new SocketServer(server, {
-            cors: {
-                origin: '*',
-                methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-                credentials: true,
-            },
-        });
-    
-        io.on('connection', (socket: any) => {
-            console.log(`a user ${socket.id} connected`);
-            socket.on('disconnect', () => {
-                console.log(`user ${socket.id} disconnected`);
-            });
-        });
-    
-        this.app.set('io', io);
+
+        const server = new HTTPServer(this.app);
     
         await server.listen(this.app.get('port'));
         console.log('Server on port', this.app.get('port'));
