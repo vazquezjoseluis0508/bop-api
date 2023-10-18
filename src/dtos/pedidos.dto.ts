@@ -56,7 +56,10 @@ export const pedidoRealizadoValidation = (data: any) => {
     const pedidoSchema = Joi.object({
         idCalendarioMenu: Joi
             .number()
-            .required()
+            .required(),
+        idPedido: Joi
+            .number()
+            .optional()
 
     });
     return pedidoSchema.validate(data);
@@ -73,5 +76,22 @@ export const pedidoCanceladoValidation = (data: any) => {
             .optional()
     });
     return pedidoSchema.validate(data);
+}
+
+export const pedidoCalificadoValidation = (data: any) => {
+    const pedidoSchema = Joi.object({
+        idCalendarioMenu: Joi
+            .number()
+            .required(),
+        idPedido: Joi
+            .number()
+            .required(),
+        rating: Joi 
+            .number(),
+        feedback: Joi
+            .string().optional()
+
+    })
+    return pedidoSchema.validate(data)
 }
 

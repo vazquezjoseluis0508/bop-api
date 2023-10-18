@@ -1,10 +1,15 @@
 import { Request, Response } from 'express'
 import { PrismaClient, calendariomenu } from '@prisma/client'
-import { deleteReservaValidation, getReservaValidation, pedidoCanceladoValidation, pedidoRealizadoValidation, reservaValidation } from '../dtos/pedidos.dto';
+import { deleteReservaValidation, getReservaValidation, pedidoCalificadoValidation, pedidoCanceladoValidation, pedidoRealizadoValidation, reservaValidation } from '../dtos/pedidos.dto';
 import { Server as SocketServer } from 'socket.io'
 
 const prisma = new PrismaClient({})
 
+interface ExtendedCalendarioMenu extends calendariomenu {
+    rating?: number; 
+    idPedido?: number;
+    feedback?: string
+}
 
 
 export async function getReservas(req: Request, res: Response): Promise<Response | void> {
@@ -45,7 +50,7 @@ export async function getReservas(req: Request, res: Response): Promise<Response
         }
 
 
-        let reservas: calendariomenu[] = await prisma.calendariomenu.findMany({
+        let reservas: ExtendedCalendarioMenu[] = await prisma.calendariomenu.findMany({
             where: where,
         })
 
@@ -58,6 +63,9 @@ export async function getReservas(req: Request, res: Response): Promise<Response
             })
             if (pedido) {
                 reservas[i].estado = pedido.estado
+                reservas[i].rating = pedido.rating
+                reservas[i].idPedido = pedido.idPedido
+                reservas[i].feedback = pedido.feedback
             }
         }
 
@@ -254,7 +262,9 @@ export async function pedidoReservado(req: Request, res: Response): Promise<Resp
                     turno: turno,
                     estado: 2,
                     f_registro: new Date(),
-                    idCalendarioMenu: calendario_menu.idCalendarioMenu
+                    idCalendarioMenu: calendario_menu.idCalendarioMenu,
+                    feedback: '',
+                    rating: 0
                 }
             })
 
@@ -264,8 +274,8 @@ export async function pedidoReservado(req: Request, res: Response): Promise<Resp
         // agregar el pedido al calendario_menu
         calendario_menu.idPedido = pedido.idPedido;
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('nueva-reserva', calendario_menu);
+        // const io: SocketServer = req.app.get('io');
+        // io.emit('nueva-reserva', calendario_menu);
 
         return res.json(calendario_menu);
     }
@@ -326,7 +336,8 @@ export async function pedidoRealizado(req: Request, res: Response): Promise<Resp
                     importe_interno: null,
                     turno: calendarioMenu?.turno,
                     f_registro: new Date(),
-
+                    feedback: '',
+                    rating: 0
                 }
             });
         }
@@ -411,7 +422,9 @@ export async function pedidoRetirado(req: Request, res: Response): Promise<Respo
                     importe_interno: null,
                     turno: calendarioMenu?.turno,
                     f_registro: new Date(),
-                    f_listo: new Date()
+                    f_listo: new Date(),
+                    feedback: '',
+                    rating: 0,
 
                 }
             });
@@ -483,6 +496,35 @@ export async function pedidoCancelado(req: Request, res: Response): Promise<Resp
     } catch (e) {
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
     }
+}
+
+/** Pedido Calificado */
+export async function pedidoCalificado(req: Request, res: Response): Promise<Response | void> {
+    // Validation
+    const { error } = pedidoCalificadoValidation(req.body);
+    if (error) return res.status(400).json(error.message);
+    try {
+        const { idCalendarioMenu, idPedido, rating, feedback } = req.body
+        const descripcion = feedback ? feedback : ''
+
+        const pedido_update = await prisma.pedido.update({
+            where: {
+                idPedido: idPedido,
+            },
+            data: {
+                feedback: descripcion,
+                rating: rating
+            }
+        })
+
+        const io: SocketServer = req.app.get('io');
+        io.emit('pedido-clificado', { pedido_update });
+
+        return res.json(pedido_update);
+    } catch (e) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+    }
+
 }
 
 export async function getPedidosMonitor(req: Request, res: Response): Promise<Response | void> {

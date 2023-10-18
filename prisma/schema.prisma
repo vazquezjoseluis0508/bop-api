@@ -450,6 +450,8 @@ model pedido {
   importe_interno  Decimal?  @db.Decimal(10, 0)
   idMenuBingo      Int?
   turno            String?   @db.VarChar(50)
+  rating           Int
+  feedback         String    @db.Text
 }
 
 model pedido_old {
