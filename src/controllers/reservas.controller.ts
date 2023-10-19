@@ -517,9 +517,6 @@ export async function pedidoCalificado(req: Request, res: Response): Promise<Res
             }
         })
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('pedido-clificado', { pedido_update });
-
         return res.json(pedido_update);
     } catch (e) {
         console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
