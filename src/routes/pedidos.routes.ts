@@ -23,7 +23,7 @@ router
     .put('/pedido-realizado',TokenValidation, pedidoRealizado)
     .put('/pedido-retirado',TokenValidation, pedidoRetirado)
     .put('/pedido-cancelado',TokenValidation, pedidoCancelado)
-    .post('/pedido-calificado', TokenValidation, pedidoCalificado)
+    .put('/pedido-calificado', TokenValidation, pedidoCalificado)
     
 
 
