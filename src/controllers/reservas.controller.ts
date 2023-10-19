@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { PrismaClient, calendariomenu } from '@prisma/client'
 import { deleteReservaValidation, getReservaValidation, pedidoCalificadoValidation, pedidoCanceladoValidation, pedidoRealizadoValidation, reservaValidation } from '../dtos/pedidos.dto';
-import { Server as SocketServer } from 'socket.io'
+// import { Server as SocketServer } from 'socket.io'
 
 const prisma = new PrismaClient({})
 
@@ -111,8 +111,8 @@ export async function eliminarReserva(req: Request, res: Response): Promise<Resp
         )
 
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('elimina-reserva', calendarioMenu);
+        // const io: SocketServer = req.app.get('io');
+        // io.emit('elimina-reserva', calendarioMenu);
 
         return res.json(calendarioMenu);
     } catch (e) {
@@ -360,8 +360,8 @@ export async function pedidoRealizado(req: Request, res: Response): Promise<Resp
             },
         });
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('pedido-realizado', { pedido, calendario_menu });
+        // const io: SocketServer = req.app.get('io');
+        // io.emit('pedido-realizado', { pedido, calendario_menu });
 
         return res.json(pedido);
     } catch (e) {
@@ -447,8 +447,8 @@ export async function pedidoRetirado(req: Request, res: Response): Promise<Respo
             }
         });
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('pedido-realizado', { pedido, calendario_menu });
+        // const io: SocketServer = req.app.get('io');
+        // io.emit('pedido-realizado', { pedido, calendario_menu });
 
         return res.json(pedido);
     } catch (e) {
@@ -489,8 +489,8 @@ export async function pedidoCancelado(req: Request, res: Response): Promise<Resp
             }
         })
 
-        const io: SocketServer = req.app.get('io');
-        io.emit('pedido-cancelado', { pedido, calendario_menu });
+        // const io: SocketServer = req.app.get('io');
+        // io.emit('pedido-cancelado', { pedido, calendario_menu });
 
         return res.json(pedido);
     } catch (e) {

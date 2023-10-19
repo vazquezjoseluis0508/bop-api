@@ -88,8 +88,11 @@ export const pedidoCalificadoValidation = (data: any) => {
             .required(),
         rating: Joi 
             .number(),
-        feedback: Joi
-            .string().optional()
+        feedback: Joi // is allowed to be empty
+            .string()
+            .optional()
+            .empty('')
+            
 
     })
     return pedidoSchema.validate(data)
