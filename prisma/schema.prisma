@@ -546,9 +546,9 @@ model seleccion_personal {
   fecha_meta_estado    DateTime? @db.Timestamp(0)
   sector               Int?      @default(0)
   motivo               String?   @db.VarChar(300)
-  correo_electronico   String?   @db.VarChar(100)
-  fecha_actualizacion  DateTime? @db.Date
   puesto               Int?
+  fecha_actualizacion  DateTime? @db.Date
+  correo_electronico   String?   @db.VarChar(100)
 }
 
 model slot_test {
@@ -688,15 +688,48 @@ model legales {
   fecha_registro    DateTime? @db.Date
 }
 
-model data_studio {
-  idDataStudio Int       @id @default(autoincrement())
-  f_registro   DateTime? @db.Date
-  estado       Int?
-  idPersona    Int?
-  descripcion  String?   @db.VarChar(100)
+model puesto {
+  idPuesto    Int    @id @default(autoincrement())
+  descripcion String @db.VarChar(100)
+  eliminado   Int?
 }
 
-model desempeno_evoltest {
+model clientes {
+  id                Int                 @id @default(autoincrement())
+  codigo            String              @unique(map: "codigo") @db.VarChar(255)
+  apellido          String              @db.VarChar(255)
+  nombre            String              @db.VarChar(255)
+  sexo              String              @db.Char(1)
+  documento         String              @db.VarChar(255)
+  ejemplar          String              @db.Char(1)
+  fecha_nacimiento  DateTime            @db.Date
+  fecha_emision     DateTime            @db.Date
+  fecha_registro    DateTime            @default(now()) @db.Timestamp(0)
+  historial_escaneo historial_escaneo[]
+}
+
+model historial_escaneo {
+  id            Int       @id @default(autoincrement())
+  cliente_id    Int?
+  usuario_id    Int?
+  fecha_escaneo DateTime  @default(now()) @db.Timestamp(0)
+  cliente       clientes? @relation(fields: [cliente_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "historial_escaneo_ibfk_1")
+  usuario       usuarios? @relation(fields: [usuario_id], references: [idUsuarios], onDelete: Restrict, onUpdate: Restrict, map: "historial_escaneo_ibfk_2")
+
+  @@index([cliente_id], map: "cliente_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model preferencia_menu_usuario {
+  idPreferencia Int       @id @default(autoincrement())
+  idUsuario     Int?
+  legajo        Int?
+  sal           Int?
+  fecharegistro DateTime? @db.Date
+  estado        Int?
+}
+
+model desempeno_evol_old {
   idDesempenoEvol           Int       @id @default(autoincrement())
   idEvaluador               Int?
   usuario                   Int?
@@ -723,43 +756,51 @@ model desempeno_evoltest {
   obs                       String?   @db.Text
 }
 
-model puesto {
-  idPuesto    Int     @id @default(autoincrement())
-  descripcion String? @db.VarChar(100)
-  eliminado   Int?
-}
-
-model clientes {
-  id                Int                 @id @default(autoincrement())
-  codigo            String              @unique(map: "codigo") @db.VarChar(255)
-  apellido          String              @db.VarChar(255)
-  nombre            String              @db.VarChar(255)
-  sexo              String              @db.Char(1)
-  documento         String              @db.VarChar(255)
-  ejemplar          String              @db.Char(1)
-  fecha_nacimiento  DateTime            @db.Date
-  fecha_emision     DateTime            @db.Date
-  fecha_registro    DateTime?           @default(now()) @db.Timestamp(0)
-  historial_escaneo historial_escaneo[]
-}
-
-model historial_escaneo {
-  id            Int       @id @default(autoincrement())
-  cliente_id    Int?
-  usuario_id    Int?
-  fecha_escaneo DateTime? @default(now()) @db.Timestamp(0)
-  cliente       clientes? @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "historial_escaneo_ibfk_1")
-  usuario       usuarios? @relation(fields: [usuario_id], references: [idUsuarios], onDelete: NoAction, onUpdate: NoAction, map: "historial_escaneo_ibfk_2")
-
-  @@index([cliente_id], map: "cliente_id")
-  @@index([usuario_id], map: "usuario_id")
-}
-
-model preferencia_menu_usuario {
-  idPreferencia Int       @id @default(autoincrement())
-  idUsuario     Int?
-  legajo        Int?
-  sal           Int?
-  fecharegistro DateTime? @db.Date
-  estado        Int?
+model persona {
+  id                       Int       @id
+  nombre                   String    @db.VarChar(100)
+  apellido                 String    @db.VarChar(100)
+  alta                     DateTime
+  id_tarjeta               Int?
+  legajo                   String?   @db.VarChar(100)
+  preciohora               Decimal   @db.Decimal(10, 2)
+  extras                   Int       @db.TinyInt
+  id_bioadmin              Int?
+  imagen                   Bytes?
+  inc_reportes             Int?      @db.TinyInt
+  eliminado                DateTime?
+  fecha_ingreso            DateTime?
+  contrasena               String?   @db.VarChar(5)
+  rol                      Int
+  direccion                String?   @db.VarChar(100)
+  dni                      String?   @db.VarChar(15)
+  email                    String?   @db.VarChar(50)
+  cel                      String?   @db.VarChar(15)
+  tel                      String?   @db.VarChar(15)
+  cp                       String?   @db.VarChar(50)
+  vehiculo                 String?   @db.VarChar(20)
+  patente                  String?   @db.VarChar(50)
+  id_provincia             Int?      @db.SmallInt
+  localidad                String?   @db.VarChar(30)
+  id_calendario            Int?
+  tarjetazk                String?   @db.VarChar(20)
+  fecha_venc               DateTime?
+  id_sector_por_empresa    Int?
+  remoto_password          String?   @db.VarChar(100)
+  envio_tarde              Int       @db.TinyInt
+  ultima_fecha_envio_tarde DateTime? @db.Date
+  email_trabajo            String?   @db.VarChar(100)
+  cuil                     String?   @db.VarChar(12)
+  pass_myweb               String?   @db.VarChar(50)
+  modulos_habilitados      String?   @db.VarChar(20)
+  IDPHONE                  String?   @db.VarChar(100)
+  ES_VISITA                Int?      @db.TinyInt
+  V_EMPRESA_ORIGEN         String?   @db.VarChar(100)
+  V_EMPLEADO_VISITA        Int?
+  V_PERTENENCIAS           String?   @db.VarChar(250)
+  V_NRO_ART                String?   @db.VarChar(25)
+  V_MOTIVO_VISITA          String?   @db.VarChar(250)
+  V_VENCIDO                Int?      @db.TinyInt
+  FECHA_NACIMIENTO         DateTime? @db.Date
+  PUESTO_TRABAJO           String?   @db.VarChar(50)
 }
