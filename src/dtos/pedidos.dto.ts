@@ -26,7 +26,6 @@ export const getReservaValidation = (data: any) => {
     const pedidoSchema = Joi.object({
         legajo: Joi
             .string()
-            .optional(),
     });
     return pedidoSchema.validate(data);
 }

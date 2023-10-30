@@ -80,6 +80,73 @@ export async function getReservas(req: Request, res: Response): Promise<Response
     }
 }
 
+
+export async function getPedidos(req: Request, res: Response): Promise<Response | void> {
+
+    // Validation
+    const { error } = getReservaValidation(req.query);
+    if (error) throw new Error(error.message);
+
+    try {
+        const { legajo } = req.query
+
+        const date = new Date();
+
+        // 30 días atrás
+        const thirtyDaysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
+
+        // 30 días en el futuro
+        const after30Days = new Date(new Date().setDate(new Date().getDate() + 30));
+
+
+        let where
+        if (legajo) {
+            where = {
+                estado: {
+                    in: [2, 3, 4, 15] // 2: reservado, 3: retirado, 4: cancelado, 15: realizado
+                },
+                legajo: String(legajo),
+                start: {
+                    gte: thirtyDaysAgo,
+                    lte: after30Days
+                }
+            }
+        } 
+
+
+        let reservas: ExtendedCalendarioMenu[] = await prisma.calendariomenu.findMany({
+            where: where,
+            orderBy: {
+                start: 'desc'
+            }
+        })
+
+        // setear el estado del pedido
+        for (let i = 0; i < reservas.length; i++) {
+            const pedido = await prisma.pedido.findFirst({
+                where: {
+                    idCalendarioMenu: reservas[i].idCalendarioMenu
+                }
+            })
+            if (pedido) {
+                reservas[i].estado = pedido.estado
+                reservas[i].rating = pedido.rating
+                reservas[i].idPedido = pedido.idPedido
+                reservas[i].feedback = pedido.feedback
+            }
+        }
+
+
+
+
+        return res.json(reservas);
+    }
+    catch (e: any) {
+        console.log("🚀 ~ file: pedidos.controller.ts ~ line 75 ~ getReservas ~ e", e)
+        return res.status(400).json(e.message);
+    }
+}
+
 export async function eliminarReserva(req: Request, res: Response): Promise<Response | void> {
 
     // Validation

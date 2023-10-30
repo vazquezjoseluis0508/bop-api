@@ -1,6 +1,7 @@
 
 import { 
     eliminarReserva, 
+    getPedidos, 
     getPedidosMonitor, 
     getReservas, 
     pedidoCalificado, 
@@ -19,11 +20,13 @@ router
     .delete('/eliminar',TokenValidation, eliminarReserva)
     .get('/get-reservas',TokenValidation, getReservas)
     .get('/get-pedidos-monitor',TokenValidation, getPedidosMonitor)
+    .get('/get-pedidos-history',TokenValidation, getPedidos)
     .post('/pedido-reservado',TokenValidation, pedidoReservado)
     .put('/pedido-realizado',TokenValidation, pedidoRealizado)
     .put('/pedido-retirado',TokenValidation, pedidoRetirado)
     .put('/pedido-cancelado',TokenValidation, pedidoCancelado)
     .put('/pedido-calificado', TokenValidation, pedidoCalificado)
+
     
 
 
